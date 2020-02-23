@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, getInfo, register, update } from '@/api/user'
 import { setToken, removeToken, getToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
 import { Message } from 'element-ui'
@@ -75,7 +75,7 @@ const actions = {
         }
         commit('SET_USER', data.username)
         commit('SET_EMAIL', data.email)
-        commit('SET_NAME', data.username)
+        commit('SET_NAME', data.nickname)
         commit('SET_AVATAR', data.photo)
         resolve(data)
       }).catch(error => {
@@ -83,21 +83,6 @@ const actions = {
       })
     })
   },
-
-  // user logout
-  logout({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
-        removeToken() // must remove  token  first
-        resetRouter()
-        commit('RESET_STATE')
-        resolve()
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },
-
   // remove token
   resetToken({ commit }) {
     return new Promise(resolve => {
@@ -105,6 +90,62 @@ const actions = {
       commit('RESET_STATE')
       resolve()
     })
+  },
+  // user logout
+  logout({ commit, state }) {
+    return new Promise((resolve, reject) => {
+      removeToken()
+      resetRouter()
+      commit('RESET_STATE')
+      resolve()
+    })
+  },
+  register({ commit }, userInfo) {
+    const { username, nickname, password, email } = userInfo
+    return new Promise((resolve, reject) => {
+      register({ username: username, password: password, nickname: nickname, email: email }).then(response => {
+        Message({
+          message: 'Register Successfully!',
+          type: 'succuess',
+          duration: 5 * 1000
+        })
+        resolve()
+      }).catch(error => {
+        Message({
+          message: 'Username repeat.',
+          type: 'error',
+          duration: 5 * 1000
+        })
+        reject(error)
+      })
+    })
+  },
+  update({ commit }, userInfo) {
+    const { username, nickname, email, avatar } = userInfo
+    return new Promise((resolve, reject) => {
+      update({ username: username, nickname: nickname, email: email, photo: avatar }).then(response => {
+        Message({
+          message: 'Update Information Successfully!',
+          type: 'succuess',
+          duration: 5 * 1000
+        })
+        commit('SET_USER', username)
+        commit('SET_EMAIL', email)
+        commit('SET_NAME', nickname)
+        commit('SET_AVATAR', avatar)
+        resolve()
+      }).catch(error => {
+        Message({
+          message: 'Error!',
+          type: 'error',
+          duration: 5 * 1000
+        })
+        reject(error)
+      })
+    })
+  },
+  avatar({ commit }, path) {
+    commit('SET_AVATAR', path)
   }
 }
 

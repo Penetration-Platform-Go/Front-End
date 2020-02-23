@@ -26,9 +26,63 @@ export function getInfo() {
   })
 }
 
-export function logout() {
+export function register(userInfo) {
   return request({
-    url: '/vue-admin-template/user/logout',
-    method: 'post'
+    url: 'http://localhost:8000/api/user',
+    method: 'post',
+    transformRequest: [function(data) {
+      data = Qs.stringify(data)
+      return data
+    }],
+    data: {
+      'username': userInfo.username,
+      'password': userInfo.password,
+      'email': userInfo.email,
+      'nickname': userInfo.nickname,
+      'photo': 'http://localhost/platform/init.png'
+    },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+export function update(userInfo) {
+  return request({
+    url: 'http://localhost:8000/api/user',
+    method: 'put',
+    transformRequest: [function(data) {
+      data = Qs.stringify(data)
+      return data
+    }],
+    data: {
+      'username': userInfo.username,
+      'email': userInfo.email,
+      'nickname': userInfo.nickname,
+      'photo': userInfo.photo
+    },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+
+export function getAllUsers() {
+  return request({
+    url: 'http://localhost:8003/admin/user/',
+    method: 'get'
+  })
+}
+
+export function getUserByUsername(params) {
+  return request({
+    url: 'http://localhost:8003/admin/user/username?username=' + params.username,
+    method: 'get'
+  })
+}
+
+export function deleteUser(params) {
+  return request({
+    url: 'http://localhost:8003/admin/user/username?username=' + params.username,
+    method: 'delete'
   })
 }

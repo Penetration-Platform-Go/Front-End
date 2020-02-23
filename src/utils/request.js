@@ -17,7 +17,7 @@ service.interceptors.request.use(
       // let each request carry token
       // ['Authenticate'] is a custom headers key
       // please modify it according to the actual situation
-      config.headers['Authenticate'] = getToken()
+      config.headers['Authentication'] = getToken()
     }
     return config
   },
