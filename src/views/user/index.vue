@@ -11,7 +11,7 @@
             v-show="imagecropperShow"
             :width="300"
             :height="300"
-            url="http://localhost:8000/api/avatar"
+            url="http://www.rowtoolong.cn:8000/api/avatar"
             lang-type="en"
             @close="close"
             @crop-upload-success="cropSuccess"

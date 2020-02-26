@@ -57,8 +57,8 @@
           <el-input v-model="EditProjectData.Title" style="width:300px" placeholder="Project Title" />
         </el-form-item>
         <el-form-item label="New Equipment">
-          <el-input v-model="EditProjectData.NewEquipment.name" style="width:300px" placeholder="New equipment name" />
-          <el-select v-model="EditProjectData.NewEquipment.type" style="width:300px" placeholder="New equipment type">
+          <el-input v-model="NewEquipment.name" style="width:300px" placeholder="New equipment name" />
+          <el-select v-model="NewEquipment.type" style="width:300px" placeholder="New equipment type">
             <el-option v-for="e in EquipmentsType" v-bind:key="e" v-bind:value="e" />
           </el-select>
           <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
@@ -76,13 +76,14 @@
           fit
           highlight-current-row
           @row-click="onClickTableHead"
+          max-height="400px"
         >
           <el-table-column align="center" label="Equipment" width="150px">
             <template slot-scope="scope">
-              {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip?'('+scope.row.ip+')':'') }}
+              {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip.length?'('+scope.row.ip+')':'') }}
             </template>
           </el-table-column>
-          <el-table-column v-for="e in EditProjectData.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip?'('+e.ip+')':'')" align="center">
+          <el-table-column v-for="e in EditProjectData.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
             <template slot-scope="scope">
               <el-switch v-model="EditProjectData.MapTable[scope.$index][EditProjectData.EquipmentList.indexOf(e)]" v-bind:disabled="EditProjectData.EquipmentList.indexOf(e) >= scope.$index ? true : false" />
             </template>
@@ -155,11 +156,6 @@ export default {
         index: 0,
         EquipmentList: [],
         MapTable: [],
-        NewEquipment: {
-          name: '',
-          type: '',
-          ip: []
-        },
         Title: '',
         SelectEquipment: {
           name: '',
@@ -171,10 +167,30 @@ export default {
         DeleteEquipment: ''
       },
       EquipmentsType: ['PC', 'Route'],
+      NewEquipment: {
+        name: '',
+        type: '',
+        ip: []
+      },
       ListLoading: false,
       EditProjectVisiable: false,
       EditEquipmentVisible: false,
       ViewMapTableVisible: false
+    }
+  },
+  watch: {
+    NewEquipment: {
+      handler(val, oldVal) {
+        var number = {
+          'PC': 0,
+          'Route': 0
+        }
+        for (var i = 0; i < this.EditProjectData.EquipmentList.length; i++) {
+          number[this.EditProjectData.EquipmentList[i].type]++
+        }
+        this.NewEquipment.name = this.NewEquipment.type + '-' + number[this.NewEquipment.type]
+      },
+      deep: true
     }
   },
   created() {
@@ -256,11 +272,6 @@ export default {
           index: 0,
           EquipmentList: [],
           MapTable: [],
-          NewEquipment: {
-            name: '',
-            type: '',
-            ip: []
-          },
           Title: '',
           SelectEquipment: {
             name: '',
@@ -361,7 +372,7 @@ export default {
       this.EditEquipmentVisible = false
     },
     onAddEquipment() {
-      var newEquipment = this.EditProjectData.NewEquipment
+      var newEquipment = this.NewEquipment
       if (!(!!newEquipment.name && !!newEquipment.type)) {
         return
       }
@@ -372,17 +383,11 @@ export default {
         })
         return
       }
-      var number = {
-        'PC': 0,
-        'Route': 0
-      }
       var newEquipmentMap = []
       for (var i = 0; i < this.EditProjectData.EquipmentList.length; i++) {
-        number[this.EditProjectData.EquipmentList[i].type]++
         newEquipmentMap.push(false)
         this.EditProjectData.MapTable[i].push(false)
       }
-      number[newEquipment.type]++
       newEquipmentMap.push(true)
       this.EditProjectData.MapTable.push(newEquipmentMap)
       this.EditProjectData.EquipmentList.push(newEquipment)
@@ -390,8 +395,8 @@ export default {
         message: 'Add Equipment successfully!',
         type: 'success'
       })
-      this.EditProjectData.NewEquipment = {
-        name: newEquipment.type + '-' + number[newEquipment.type],
+      this.NewEquipment = {
+        name: '',
         type: newEquipment.type,
         ip: []
       }
@@ -401,17 +406,17 @@ export default {
         index: 0,
         EquipmentList: [],
         MapTable: [],
-        NewEquipment: {
-          name: '',
-          type: '',
-          ip: []
-        },
         SelectEquipment: {
           name: '',
           type: '',
           ip: []
         },
         DeleteEquipment: ''
+      }
+      this.NewEquipment = {
+        name: '',
+        type: '',
+        ip: []
       }
       this.EditProjectVisiable = false
     },

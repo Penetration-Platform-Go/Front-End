@@ -5,8 +5,8 @@
         <el-input v-model="form.Title" style="width:300px" placeholder="Project Name" />
       </el-form-item>
       <el-form-item label="New Equipment">
-        <el-input v-model="form.NewEquipment.name" style="width:300px" placeholder="New equipment name" />
-        <el-select v-model="form.NewEquipment.type" style="width:300px" placeholder="New equipment type">
+        <el-input v-model="NewEquipment.name" style="width:300px" placeholder="New equipment name" />
+        <el-select v-model="NewEquipment.type" style="width:300px" placeholder="New equipment type">
           <el-option v-for="e in form.EquipmentsType" v-bind:key="e" v-bind:value="e" />
         </el-select>
         <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
@@ -24,13 +24,14 @@
         fit
         highlight-current-row
         @row-click="onClickTableHead"
+        max-height="400px"
       >
         <el-table-column align="center" label="Equipment" width="150px">
           <template slot-scope="scope">
-            {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip[0]?'('+scope.row.ip+')':'') }}
+            {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip.length?'('+scope.row.ip+')':'') }}
           </template>
         </el-table-column>
-        <el-table-column v-for="e in form.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip?'('+e.ip+')':'')" align="center">
+        <el-table-column v-for="e in form.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
           <template slot-scope="scope">
             <el-switch v-model="form.MapTable[scope.$index][form.EquipmentList.indexOf(e)]" v-bind:disabled="form.EquipmentList.indexOf(e) >= scope.$index ? true : false" />
           </template>
@@ -93,11 +94,6 @@ export default {
           ip: ['127.0.0.1']
         }],
         MapTable: [[true]],
-        NewEquipment: {
-          name: 'PC-1',
-          type: 'PC',
-          ip: []
-        },
         SelectEquipment: {
           index: 0,
           name: '',
@@ -108,17 +104,29 @@ export default {
         },
         DeleteEquipment: ''
       },
-      EditEquipmentVisible: false
+      EditEquipmentVisible: false,
+      NewEquipment: {
+        name: 'PC-1',
+        type: 'PC',
+        ip: []
+      }
     }
   },
-  // watch: {
-  //   NewEquipment: {
-  //     handler(val, oldVal) {
-  //       this.form.NewEquipment.name = this.form.NewEquipment.type + '-'
-  //     },
-  //     deep: true
-  //   }
-  // },
+  watch: {
+    NewEquipment: {
+      handler(val, oldVal) {
+        var number = {
+          'PC': 0,
+          'Route': 0
+        }
+        for (var i = 0; i < this.form.EquipmentList.length; i++) {
+          number[this.form.EquipmentList[i].type]++
+        }
+        this.NewEquipment.name = this.NewEquipment.type + '-' + number[this.NewEquipment.type]
+      },
+      deep: true
+    }
+  },
   methods: {
     onSubmit() {
       if (this.form.title === '') {
@@ -159,7 +167,7 @@ export default {
       CreateProject(data)
         .then((res) => {
           this.form.Title = ''
-          this.form.NewEquipment = {
+          this.NewEquipment = {
             name: 'PC-1',
             type: 'PC',
             ip: []
@@ -185,7 +193,7 @@ export default {
     },
     onCancel() {
       this.form.Title = ''
-      this.form.NewEquipment = {
+      this.NewEquipment = {
         name: 'PC-1',
         type: 'PC',
         ip: []
@@ -253,7 +261,7 @@ export default {
       this.EditEquipmentVisible = false
     },
     onAddEquipment() {
-      var newEquipment = this.form.NewEquipment
+      var newEquipment = this.NewEquipment
       if (!(!!newEquipment.name && !!newEquipment.type)) {
         return
       }
@@ -264,17 +272,11 @@ export default {
         })
         return
       }
-      var number = {
-        'PC': 0,
-        'Route': 0
-      }
       var newEquipmentMap = []
       for (var i = 0; i < this.form.EquipmentList.length; i++) {
-        number[this.form.EquipmentList[i].type]++
         newEquipmentMap.push(false)
         this.form.MapTable[i].push(false)
       }
-      number[newEquipment.type]++
       newEquipmentMap.push(true)
       this.form.MapTable.push(newEquipmentMap)
       this.form.EquipmentList.push(newEquipment)
@@ -282,8 +284,8 @@ export default {
         message: 'Add Equipment successfully!',
         type: 'success'
       })
-      this.form.NewEquipment = {
-        name: newEquipment.type + '-' + number[newEquipment.type],
+      this.NewEquipment = {
+        name: '',
         type: newEquipment.type,
         ip: []
       }

@@ -101,13 +101,14 @@
           border
           fit
           highlight-current-row
+          max-height="400px"
         >
           <el-table-column align="center" label="Equipment" width="150px">
             <template slot-scope="scope">
-              {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip?'('+scope.row.ip+')':'') }}
+              {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip.length?'('+scope.row.ip+')':'') }}
             </template>
           </el-table-column>
-          <el-table-column v-for="e in SelectUser.SelectProject.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip?'('+e.ip+')':'')" align="center">
+          <el-table-column v-for="e in SelectUser.SelectProject.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
             <template slot-scope="scope">
               <el-switch v-model="SelectUser.SelectProject.MapTable[scope.$index][SelectUser.SelectProject.EquipmentList.indexOf(e)]" :disabled="true" />
             </template>
