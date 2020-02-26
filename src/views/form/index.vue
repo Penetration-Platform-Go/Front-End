@@ -6,7 +6,7 @@
       </el-form-item>
       <el-form-item label="New Equipment">
         <el-input v-model="NewEquipment.name" style="width:300px" placeholder="New equipment name" />
-        <el-select v-model="NewEquipment.type" style="width:300px" placeholder="New equipment type">
+        <el-select v-model="NewEquipmentType" style="width:300px" placeholder="New equipment type">
           <el-option v-for="e in form.EquipmentsType" v-bind:key="e" v-bind:value="e" />
         </el-select>
         <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
@@ -107,22 +107,16 @@ export default {
       EditEquipmentVisible: false,
       NewEquipment: {
         name: 'PC-1',
-        type: 'PC',
+        type: '',
         ip: []
-      }
+      },
+      NewEquipmentType: 'PC'
     }
   },
   watch: {
-    NewEquipment: {
+    NewEquipmentType: {
       handler(val, oldVal) {
-        var number = {
-          'PC': 0,
-          'Route': 0
-        }
-        for (var i = 0; i < this.form.EquipmentList.length; i++) {
-          number[this.form.EquipmentList[i].type]++
-        }
-        this.NewEquipment.name = this.NewEquipment.type + '-' + number[this.NewEquipment.type]
+        this.getNewEquipmentName(0)
       },
       deep: true
     }
@@ -261,6 +255,7 @@ export default {
       this.EditEquipmentVisible = false
     },
     onAddEquipment() {
+      this.NewEquipment.type = this.NewEquipmentType
       var newEquipment = this.NewEquipment
       if (!(!!newEquipment.name && !!newEquipment.type)) {
         return
@@ -286,9 +281,10 @@ export default {
       })
       this.NewEquipment = {
         name: '',
-        type: newEquipment.type,
+        type: this.NewEquipmentType,
         ip: []
       }
+      this.getNewEquipmentName(0)
     },
     onAddIP() {
       if (!this.checkIP(this.form.SelectEquipment.NewIP)) {
@@ -314,6 +310,14 @@ export default {
           this.form.SelectEquipment.ip.splice(i, 1)
           this.form.SelectEquipment.SelectIP = ''
           return
+        }
+      }
+    },
+    getNewEquipmentName(index) {
+      this.NewEquipment.name = this.NewEquipmentType + '-' + index
+      for (var i = 0; i < this.form.EquipmentList.length; i++) {
+        if (this.NewEquipment.name === this.form.EquipmentList[i].name) {
+          return this.getNewEquipmentName(index + 1)
         }
       }
     },

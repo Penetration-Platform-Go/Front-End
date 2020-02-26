@@ -58,7 +58,7 @@
         </el-form-item>
         <el-form-item label="New Equipment">
           <el-input v-model="NewEquipment.name" style="width:300px" placeholder="New equipment name" />
-          <el-select v-model="NewEquipment.type" style="width:300px" placeholder="New equipment type">
+          <el-select v-model="NewEquipmentType" style="width:300px" placeholder="New equipment type">
             <el-option v-for="e in EquipmentsType" v-bind:key="e" v-bind:value="e" />
           </el-select>
           <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
@@ -172,6 +172,7 @@ export default {
         type: '',
         ip: []
       },
+      NewEquipmentType: '',
       ListLoading: false,
       EditProjectVisiable: false,
       EditEquipmentVisible: false,
@@ -179,16 +180,9 @@ export default {
     }
   },
   watch: {
-    NewEquipment: {
+    NewEquipmentType: {
       handler(val, oldVal) {
-        var number = {
-          'PC': 0,
-          'Route': 0
-        }
-        for (var i = 0; i < this.EditProjectData.EquipmentList.length; i++) {
-          number[this.EditProjectData.EquipmentList[i].type]++
-        }
-        this.NewEquipment.name = this.NewEquipment.type + '-' + number[this.NewEquipment.type]
+        this.getNewEquipmentName(0)
       },
       deep: true
     }
@@ -363,15 +357,16 @@ export default {
       this.EditProjectData.EquipmentList[index].type = selectEquipment.type
       this.EditProjectData.EquipmentList[index].ip = selectEquipment.ip
       this.EditEquipmentVisible = false
-      this.$message({
-        message: 'Edit equirement successfully!',
-        type: 'success'
-      })
+      // this.$message({
+      //   message: 'Edit equirement successfully!',
+      //   type: 'success'
+      // })
     },
     onCancleEditEquipment() {
       this.EditEquipmentVisible = false
     },
     onAddEquipment() {
+      this.NewEquipment.type = this.NewEquipmentType
       var newEquipment = this.NewEquipment
       if (!(!!newEquipment.name && !!newEquipment.type)) {
         return
@@ -397,9 +392,10 @@ export default {
       })
       this.NewEquipment = {
         name: '',
-        type: newEquipment.type,
+        type: this.NewEquipmentType,
         ip: []
       }
+      this.getNewEquipmentName(0)
     },
     onCancelEditProject() {
       this.EditProjectData = {
@@ -424,6 +420,14 @@ export default {
       this.EditProjectData.EquipmentList = data.EquipmentList
       this.EditProjectData.MapTable = data.MapTable
       this.ViewMapTableVisible = true
+    },
+    getNewEquipmentName(index) {
+      this.NewEquipment.name = this.NewEquipmentType + '-' + index
+      for (var i = 0; i < this.EditProjectData.EquipmentList.length; i++) {
+        if (this.NewEquipment.name === this.EditProjectData.EquipmentList[i].name) {
+          return this.getNewEquipmentName(index + 1)
+        }
+      }
     },
     getIndexByName(name) {
       for (var i = 0; i < this.EditProjectData.EquipmentList.length; i++) {
