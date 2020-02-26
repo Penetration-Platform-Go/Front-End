@@ -3,7 +3,7 @@ import Qs from 'qs'
 
 export function login(userInfo) {
   return request({
-    url: 'http://localhost:8001/auth',
+    url: 'http://www.rowtoolong.cn:8001/auth',
     method: 'post',
     transformRequest: [function(data) {
       data = Qs.stringify(data)
@@ -21,14 +21,14 @@ export function login(userInfo) {
 
 export function getInfo() {
   return request({
-    url: 'http://localhost:8001/userinfo',
+    url: 'http://www.rowtoolong.cn:8001/userinfo',
     method: 'get'
   })
 }
 
 export function register(userInfo) {
   return request({
-    url: 'http://localhost:8000/api/user',
+    url: 'http://www.rowtoolong.cn:8000/api/user',
     method: 'post',
     transformRequest: [function(data) {
       data = Qs.stringify(data)
@@ -39,7 +39,7 @@ export function register(userInfo) {
       'password': userInfo.password,
       'email': userInfo.email,
       'nickname': userInfo.nickname,
-      'photo': 'http://localhost/platform/init.png'
+      'photo': 'http://www.rowtoolong.cn/platform/init.png'
     },
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -48,7 +48,7 @@ export function register(userInfo) {
 }
 export function update(userInfo) {
   return request({
-    url: 'http://localhost:8000/api/user',
+    url: 'http://www.rowtoolong.cn:8000/api/user',
     method: 'put',
     transformRequest: [function(data) {
       data = Qs.stringify(data)
@@ -68,21 +68,21 @@ export function update(userInfo) {
 
 export function GetAllUsers() {
   return request({
-    url: 'http://localhost:8003/admin/user/',
+    url: 'http://www.rowtoolong.cn:8003/admin/user/',
     method: 'get'
   })
 }
 
 export function GetUserByUsername(params) {
   return request({
-    url: 'http://localhost:8003/admin/user/username?username=' + params.username,
+    url: 'http://www.rowtoolong.cn:8003/admin/user/username?username=' + params.username,
     method: 'get'
   })
 }
 
 export function DeleteUser(params) {
   return request({
-    url: 'http://localhost:8003/admin/user/username?username=' + params.username,
+    url: 'http://www.rowtoolong.cn:8003/admin/user/username?username=' + params.username,
     method: 'delete'
   })
 }

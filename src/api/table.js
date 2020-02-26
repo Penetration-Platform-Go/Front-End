@@ -2,21 +2,21 @@ import request from '@/utils/request'
 
 export function GetProjectList() {
   return request({
-    url: 'http://localhost:8002/api/project/',
+    url: 'http://www.rowtoolong.cn:8002/api/project/',
     method: 'get'
   })
 }
 
 export function GetProjectsAdmin() {
   return request({
-    url: 'http://localhost:8003/admin/project/',
+    url: 'http://www.rowtoolong.cn:8003/admin/project/',
     method: 'get'
   })
 }
 
 export function CreateProject(params) {
   return request({
-    url: 'http://localhost:8002/api/project/',
+    url: 'http://www.rowtoolong.cn:8002/api/project/',
     method: 'post',
     data: {
       'equipment': params['equipment'],
@@ -30,21 +30,21 @@ export function CreateProject(params) {
 
 export function DeleteProject(params) {
   return request({
-    url: 'http://localhost:8002/api/project/?id=' + params['id'],
+    url: 'http://www.rowtoolong.cn:8002/api/project/?id=' + params['id'],
     method: 'delete'
   })
 }
 
 export function DeleteProjectAdmin(params) {
   return request({
-    url: 'http://localhost:8003/admin/project/?id=' + params['id'],
+    url: 'http://www.rowtoolong.cn:8003/admin/project/?id=' + params['id'],
     method: 'delete'
   })
 }
 
 export function UpdateProject(params) {
   return request({
-    url: 'http://localhost:8002/api/project/',
+    url: 'http://www.rowtoolong.cn:8002/api/project/',
     method: 'put',
     data: {
       'id': params['id'],
@@ -58,7 +58,7 @@ export function UpdateProject(params) {
 }
 export function UpdateProjectAdmin(params) {
   return request({
-    url: 'http://localhost:8003/admin/project/score',
+    url: 'http://www.rowtoolong.cn:8003/admin/project/score',
     method: 'put',
     data: {
       'id': params['id'],
@@ -70,25 +70,25 @@ export function UpdateProjectAdmin(params) {
 export function QueryListAdmin(params) {
   if (params.Title !== '') {
     return request({
-      url: 'http://localhost:8003/admin/project/title?title=' + params.Title,
+      url: 'http://www.rowtoolong.cn:8003/admin/project/title?title=' + params.Title,
       method: 'get'
     })
   }
   if (params.Author !== '') {
     return request({
-      url: 'http://localhost:8003/admin/project/user?username=' + params.Author,
+      url: 'http://www.rowtoolong.cn:8003/admin/project/user?username=' + params.Author,
       method: 'get'
     })
   }
   return request({
-    url: 'http://localhost:8003/admin/project/',
+    url: 'http://www.rowtoolong.cn:8003/admin/project/',
     method: 'get'
   })
 }
 
 export function AdminGetInfo() {
   return request({
-    url: 'http://localhost:8003/admin/info/',
+    url: 'http://www.rowtoolong.cn:8003/admin/info/',
     method: 'get'
   })
 }
