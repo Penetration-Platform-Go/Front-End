@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
     <el-table
-      v-loading="listLoading"
-      :data="list"
+      v-loading="ListLoading"
+      :data="ProjectList"
       element-loading-text="Loading"
       border
       fit
@@ -13,113 +13,131 @@
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="ID" width="250">
+      <el-table-column align="center" label="ID" width="210">
         <template slot-scope="scope">
-          {{ scope.row.id }}
+          {{ scope.row.Id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Title">
         <template slot-scope="scope">
-          {{ scope.row.title }}
+          {{ scope.row.Title }}
         </template>
       </el-table-column>
       <el-table-column label="Author" width="110" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.user }}</span>
+          <span>{{ scope.row.User }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="IP number" width="110" align="center">
+      <el-table-column label="Equipment number" width="160" align="center">
         <template slot-scope="scope">
-          {{ scope.row.iplist.length }}
+          {{ scope.row.EquipmentList.length }}
         </template>
       </el-table-column>
-      <el-table-column label="Map" align="center" width="100">
+      <el-table-column label="MapTable" align="center" width="100">
         <template slot-scope="scope">
           <el-button class="el-icon-search" @click="onViewMap(scope.row)" />
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="Score" width="110" align="center">
         <template slot-scope="scope">
-          {{ !!!scope.row.score? "Not rated":scope.row.score }}
+          {{ !!!scope.row.Score? "Not rated":scope.row.Score }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions" width="200">
         <template slot-scope="scope">
-          <el-button class="el-icon-edit" :disabled="scope.row.score != 0" @click="editProject(scope.$index, scope.row)" />
-          <el-button class="el-icon-delete" :disabled="scope.row.score != 0" @click="deleteProject(scope.$index, scope.row.id)" />
+          <el-button class="el-icon-edit" :disabled="scope.row.Score != 0" @click="EditProject(scope.$index, scope.row)" />
+          <el-button class="el-icon-delete" :disabled="scope.row.Score != 0" @click="DeleteProject(scope.$index, scope.row.id)" />
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog title="Edit Project" :visible.sync="dialogFormVisible" width="1000px">
-      <el-form ref="temp" :model="temp" label-width="120px">
-        <el-form-item label="Title">
-          <el-input v-model="temp.title" style="width:300px" />
+    <el-dialog title="Edit Project" :visible.sync="EditProjectVisiable" width="1000px">
+      <el-form ref="EditProjectData" :model="EditProjectData" label-width="150px">
+        <el-form-item label="Project Title">
+          <el-input v-model="EditProjectData.Title" style="width:300px" placeholder="Project Title" />
         </el-form-item>
-        <el-form-item label="New Ip">
-          <el-input v-model="temp.newip" style="width:300px" /> <el-button style="width:80px" type="primary" @click="onNewIp">Add</el-button>
-        </el-form-item>
-        <el-form-item label="Ip List">
-          <el-select v-model="temp.selectip" style="width:300px" placeholder="Please select IP you want to delete">
-            <el-option v-for="ip in temp.iplist" v-bind:key="ip" v-bind:value="ip" />
+        <el-form-item label="New Equipment">
+          <el-input v-model="EditProjectData.NewEquipment.name" style="width:300px" placeholder="New equipment name" />
+          <el-select v-model="EditProjectData.NewEquipment.type" style="width:300px" placeholder="New equipment type">
+            <el-option v-for="e in EquipmentsType" v-bind:key="e" v-bind:value="e" />
           </el-select>
-          <el-button style="width:80px" type="primary" @click="onDeleteIp">Delete</el-button>
+          <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
         </el-form-item>
-
+        <el-form-item label="Delete Equipment">
+          <el-select v-model="EditProjectData.DeleteEquipment" style="width:300px" placeholder="Equipment Delete">
+            <el-option v-for="e in EditProjectData.EquipmentList" v-bind:key="e.name" v-bind:value="e.name" />
+          </el-select>
+          <el-button style="width:80px" type="primary" @click="onDeleteEquipment">Delete</el-button>
+        </el-form-item>
         <el-table
-          v-model="temp"
-          :data="temp.map"
+          v-model="EditProjectData"
+          :data="EditProjectData.EquipmentList"
           border
           fit
           highlight-current-row
+          @row-click="onClickTableHead"
         >
-          <el-table-column align="center" label="IP" width="150px">
+          <el-table-column align="center" label="Equipment" width="150px">
             <template slot-scope="scope">
-              {{ scope.row.ip }}
+              {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip?'('+scope.row.ip+')':'') }}
             </template>
           </el-table-column>
-          <el-table-column v-for="ip in temp.iplist" v-bind:key="ip" v-bind:label="ip" align="center">
+          <el-table-column v-for="e in EditProjectData.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip?'('+e.ip+')':'')" align="center">
             <template slot-scope="scope">
-              <el-switch v-model="scope.row.whether[ip]" />
+              <el-switch v-model="EditProjectData.MapTable[scope.$index][EditProjectData.EquipmentList.indexOf(e)]" v-bind:disabled="EditProjectData.EquipmentList.indexOf(e) >= scope.$index ? true : false" />
             </template>
           </el-table-column>
         </el-table>
         <el-form-item />
+        <vis style="height: 500px; border: 1px solid lightgray;" :equipment-list="EditProjectData.EquipmentList" :map-table="EditProjectData.MapTable" />
+        <el-form-item />
         <el-form-item>
-          <el-button style="width:150px" type="primary" @click="onUpdate">Update</el-button>
-          <el-button style="width:150px" @click="onCancle">Cancle</el-button>
+          <el-button style="width:150px" type="primary" @click="onUpdateProject">Update</el-button>
+          <el-button style="width:150px" @click="onCancelEditProject">Cancle</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
 
-    <el-dialog :title="temp.title" :visible.sync="ViewdialogFormVisible" width="1000px">
-      <el-table
-        v-model="temp"
-        :data="temp.map"
-        border
-        fit
-        highlight-current-row
-      >
-        <el-table-column align="center" label="IP" width="150px">
-          <template slot-scope="scope">
-            {{ scope.row.ip }}
-          </template>
-        </el-table-column>
-        <el-table-column v-for="ip in temp.iplist" v-bind:key="ip" v-bind:label="ip" align="center">
-          <template slot-scope="scope">
-            <el-switch v-model="scope.row.whether[ip]" />
-          </template>
-        </el-table-column>
-      </el-table>
+    <el-dialog title="Edit" :visible.sync="EditEquipmentVisible">
+      <el-form ref="SelectEquipment" :model="EditProjectData.SelectEquipment" label-width="120px">
+        <el-form-item label="Name">
+          <el-input v-model="EditProjectData.SelectEquipment.name" style="width:300px" />
+        </el-form-item>
+        <el-form-item label="Type">
+          <el-select v-model="EditProjectData.SelectEquipment.type" style="width:300px" placeholder="Equipment type">
+            <el-option v-for="e in EquipmentsType" v-bind:key="e" v-bind:value="e" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Add IP">
+          <el-input v-model="EditProjectData.SelectEquipment.NewIP" style="width:300px" placeholder="New IP" />
+          <el-button style="width:80px" type="primary" @click="onAddIP">Add</el-button>
+        </el-form-item>
+        <el-form-item label="Delete IP">
+          <el-select v-model="EditProjectData.SelectEquipment.SelectIP" style="width:300px" placeholder="IP">
+            <el-option v-for="ip in EditProjectData.SelectEquipment.ip" v-bind:key="ip" v-bind:value="ip" />
+          </el-select>
+          <el-button style="width:80px" type="primary" @click="onDeleteIP">Delete</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="width:150px" type="primary" @click="onEditEquipment">Change</el-button>
+          <el-button style="width:150px" @click="onCancleEditEquipment">Cancle</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    <el-dialog title="MapTable" :visible.sync="ViewMapTableVisible" width="1000px">
+      <vis style="height: 500px; border: 1px solid lightgray;" :equipment-list="EditProjectData.EquipmentList" :map-table="EditProjectData.MapTable" />
     </el-dialog>
 
   </div>
 </template>
 
 <script>
-import { getList, deleteProject, updateProject } from '@/api/table'
+import { GetProjectList, DeleteProject, UpdateProject } from '@/api/table'
+import vis from '@/components/Network/index'
 
 export default {
+  components: { vis },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -132,19 +150,31 @@ export default {
   },
   data() {
     return {
-      list: [],
-      listLoading: true,
-      dialogFormVisible: false,
-      ViewdialogFormVisible: false,
-      temp: {
-        id: '',
+      ProjectList: [],
+      EditProjectData: {
         index: 0,
-        title: '',
-        newip: '',
-        selectip: '',
-        iplist: [],
-        map: []
-      }
+        EquipmentList: [],
+        MapTable: [],
+        NewEquipment: {
+          name: '',
+          type: '',
+          ip: []
+        },
+        Title: '',
+        SelectEquipment: {
+          name: '',
+          type: '',
+          ip: [],
+          NewIP: '',
+          SelectIP: ''
+        },
+        DeleteEquipment: ''
+      },
+      EquipmentsType: ['PC', 'Route'],
+      ListLoading: false,
+      EditProjectVisiable: false,
+      EditEquipmentVisible: false,
+      ViewMapTableVisible: false
     }
   },
   created() {
@@ -152,43 +182,37 @@ export default {
   },
   methods: {
     fetchData() {
-      this.listLoading = true
-      getList().then(response => {
-        var temp = response.data
-        for (var index in temp) {
+      this.ListLoading = true
+      GetProjectList().then(response => {
+        var data = response.data
+        for (var index in data) {
           var each = {}
-          each.id = temp[index].id
-          each.user = temp[index].user
-          each.title = temp[index].title
-          each.score = temp[index].score
-          each.iplist = []
-          for (var n in temp[index].ip) {
-            each.iplist.push(temp[index].ip[n].value)
+          each.Id = data[index].id
+          each.User = data[index].user
+          each.Title = data[index].title
+          each.Score = data[index].score
+          each.EquipmentList = data[index].equipment
+          each.MapTable = []
+          const MapT = data[index].map['column']
+          for (var i in MapT) {
+            each.MapTable.push(MapT[i]['connected'])
           }
-          each.map = []
-          for (var i in temp[index].map.column) {
-            var eachmap = {
-              'ip': each.iplist[i],
-              whether: {}
-            }
-            for (var j in temp[index].map.column[i]['connected']) {
-              eachmap.whether[each.iplist[j]] = temp[index].map.column[i]['connected'][j]
-            }
-            each.map.push(eachmap)
-          }
-          this.list.push(each)
+          this.ProjectList.push(each)
         }
-        this.listLoading = false
+        this.ListLoading = false
       })
     },
-    editProject(index, data) {
-      this.temp = data
-      this.temp.index = index
-      this.dialogFormVisible = true
+    EditProject(index, data) {
+      this.EditProjectData.EquipmentList = data.EquipmentList
+      this.EditProjectData.MapTable = data.MapTable
+      this.EditProjectData.Title = data.Title
+      this.EditProjectData.Id = data.Id
+      this.EditProjectData.index = index
+      this.EditProjectVisiable = true
     },
-    deleteProject(index, id) {
-      deleteProject({ 'id': id }).then((res) => {
-        this.list.splice(index, 1)
+    DeleteProject(index, id) {
+      DeleteProject({ 'id': id }).then((res) => {
+        this.ProjectList.splice(index, 1)
         this.$message({
           message: 'Delete Project Successfully!',
           type: 'success'
@@ -200,104 +224,216 @@ export default {
         })
       })
     },
-    onUpdate() {
-      if (this.temp.iplist.length === 1) {
+    onUpdateProject() {
+      var data = {
+        'id': this.EditProjectData.Id,
+        'title': this.EditProjectData.Title,
+        'equipment': this.EditProjectData.EquipmentList,
+        'map': []
+      }
+      for (var i in this.EditProjectData.MapTable) {
+        if (this.EditProjectData.EquipmentList[i].ip.length === 0) {
+          this.$message({
+            message: 'Some equipments\' IP wrong!',
+            type: 'error'
+          })
+          return
+        }
+        var temp = {
+          'connected': []
+        }
+        for (var j in this.EditProjectData.MapTable[i]) {
+          temp['connected'].push(this.EditProjectData.MapTable[i][j])
+        }
+        data['map'].push(temp)
+      }
+      UpdateProject(data).then(() => {
+        const index = this.EditProjectData.index
+        this.ProjectList[index].EquipmentList = this.EditProjectData.EquipmentList
+        this.ProjectList[index].MapTable = this.EditProjectData.MapTable
+        this.ProjectList[index].Title = this.EditProjectData.Title
+        this.EditProjectData = {
+          index: 0,
+          EquipmentList: [],
+          MapTable: [],
+          NewEquipment: {
+            name: '',
+            type: '',
+            ip: []
+          },
+          Title: '',
+          SelectEquipment: {
+            name: '',
+            type: '',
+            ip: [],
+            NewIP: '',
+            SelectIP: ''
+          },
+          DeleteEquipment: ''
+        }
+        this.EditProjectVisiable = false
         this.$message({
-          message: 'IP number wrong!',
+          message: 'Update Project Successfully!',
+          type: 'success'
+        })
+      }).catch(() => {
+        this.$message({
+          message: 'Error!',
+          type: 'error'
+        })
+      })
+    },
+    onDeleteEquipment() {
+      const removeIndex = this.getIndexByName(this.EditProjectData.DeleteEquipment)
+      this.EditProjectData.EquipmentList.splice(removeIndex, 1)
+      this.EditProjectData.MapTable.splice(removeIndex, 1)
+      for (var i = 0; i < this.EditProjectData.MapTable.length; i++) {
+        this.EditProjectData.MapTable[i].splice(removeIndex, 1)
+      }
+      this.$message({
+        message: 'Delete ' + this.EditProjectData.DeleteEquipment,
+        type: 'warning'
+      })
+      this.EditProjectData.DeleteEquipment = ''
+    },
+    onAddIP() {
+      if (!this.checkIP(this.EditProjectData.SelectEquipment.NewIP)) {
+        this.$message({
+          message: 'IP format error',
           type: 'error'
         })
         return
       }
-      var data = {
-        'id': this.temp.id,
-        'title': this.temp.title,
-        'ip': [],
-        'map': []
-      }
-      for (var i in this.temp.iplist) {
-        data.ip.push({ 'id': i, 'value': this.temp.iplist[i] })
-        var map = this.temp.map[i].whether
-        var connect = { 'connected': [] }
-        for (var j in this.temp.iplist) {
-          connect['connected'].push(map[this.temp.iplist[j]])
-        }
-        data.map.push(connect)
-      }
-      updateProject(data)
-        .then((res) => {
-          this.$message({
-            message: 'Update Project Successfully!',
-            type: 'success'
-          })
-          this.list[this.temp.index] = this.temp
-          this.dialogFormVisible = false
-        })
-        .catch(() => {
-          this.$message({
-            message: 'Error!',
-            type: 'error'
-          })
-        })
-    },
-    onViewMap(data) {
-      this.temp.title = data.title
-      this.temp.iplist = data.iplist
-      this.temp.map = data.map
-      this.ViewdialogFormVisible = true
-    },
-    onDeleteIp() {
-      this.temp.iplist.splice(this.temp.iplist.indexOf(this.temp.selectip), 1)
-      var removeIndex = 0
-      for (var index in this.temp.map) {
-        if (this.temp.map[index]['ip'] === this.temp.selectip) {
-          removeIndex = index
-        }
-        delete this.temp.map[index].whether[this.temp.selectip]
-      }
-      this.temp.map.splice(removeIndex, 1)
-      this.temp.selectip = ''
-      this.$message({
-        message: 'Delete ' + this.temp.selectip,
-        type: 'warning'
-      })
-    },
-    onCancle() {
-      this.ViewdialogFormVisible = false
-      this.dialogFormVisible = false
-    },
-    onNewIp() {
-      var newip = this.temp.newip
-      var pattern = new RegExp('^((25[0-5]|2[0-4]\\d|[1]{1}\\d{1}\\d{1}|[1-9]{1}\\d{1}|\\d{1})($|(?!\\.$)\\.)){4}$')
-      if (this.temp.iplist.indexOf(newip) >= 0) {
+      if (this.EditProjectData.SelectEquipment.ip.indexOf(this.EditProjectData.SelectEquipment.NewIP) >= 0) {
         this.$message({
           message: 'IP exists',
           type: 'error'
         })
         return
       }
-      if (this.temp.newip.length <= 16 && pattern.test(newip)) {
-        this.$message({
-          message: 'Add IP successfully!',
-          type: 'success'
-        })
-        var newipmap = {
-          'ip': newip,
-          whether: {}
+      this.EditProjectData.SelectEquipment.ip.push(this.EditProjectData.SelectEquipment.NewIP)
+      this.EditProjectData.SelectEquipment.NewIP = ''
+    },
+    onDeleteIP() {
+      for (var i = 0; i < this.EditProjectData.SelectEquipment.ip.length; i++) {
+        if (this.EditProjectData.SelectEquipment.ip[i] === this.EditProjectData.SelectEquipment.SelectIP) {
+          this.EditProjectData.SelectEquipment.ip.splice(i, 1)
+          this.EditProjectData.SelectEquipment.SelectIP = ''
+          return
         }
-        newipmap['whether'][newip] = true
-        for (var index in this.temp.map) {
-          this.temp.map[index]['whether'][newip] = false
-          newipmap['whether'][this.temp.map[index]['ip']] = false
-        }
-        this.temp.map.push(newipmap)
-        this.temp.iplist.push(newip)
-        this.temp.newip = ''
-      } else {
+      }
+    },
+    onClickTableHead(row, column, event) {
+      if (column.realWidth) {
+        return
+      }
+      this.EditProjectData.SelectEquipment.name = row.name
+      this.EditProjectData.SelectEquipment.type = row.type
+      this.EditProjectData.SelectEquipment.ip = row.ip
+      this.EditProjectData.SelectEquipment.index = this.getIndexByName(row.name)
+      this.EditEquipmentVisible = true
+    },
+    onEditEquipment() {
+      // TODO: integrate into function
+      var selectEquipment = this.EditProjectData.SelectEquipment
+      if (!(!!selectEquipment.name && !!selectEquipment.type)) {
+        return
+      }
+      if (this.getIndexByName(selectEquipment.name) >= 0 && this.getIndexByName(selectEquipment.name) !== selectEquipment.index) {
         this.$message({
-          message: 'IP format error!',
+          message: 'Equipment name repeat!',
           type: 'error'
         })
+        return
       }
+
+      const index = selectEquipment.index
+      this.EditProjectData.EquipmentList[index].name = selectEquipment.name
+      this.EditProjectData.EquipmentList[index].type = selectEquipment.type
+      this.EditProjectData.EquipmentList[index].ip = selectEquipment.ip
+      this.EditEquipmentVisible = false
+      this.$message({
+        message: 'Edit equirement successfully!',
+        type: 'success'
+      })
+    },
+    onCancleEditEquipment() {
+      this.EditEquipmentVisible = false
+    },
+    onAddEquipment() {
+      var newEquipment = this.EditProjectData.NewEquipment
+      if (!(!!newEquipment.name && !!newEquipment.type)) {
+        return
+      }
+      if (this.getIndexByName(newEquipment.name) >= 0) {
+        this.$message({
+          message: 'Equipment name repeat!',
+          type: 'error'
+        })
+        return
+      }
+      var number = {
+        'PC': 0,
+        'Route': 0
+      }
+      var newEquipmentMap = []
+      for (var i = 0; i < this.EditProjectData.EquipmentList.length; i++) {
+        number[this.EditProjectData.EquipmentList[i].type]++
+        newEquipmentMap.push(false)
+        this.EditProjectData.MapTable[i].push(false)
+      }
+      number[newEquipment.type]++
+      newEquipmentMap.push(true)
+      this.EditProjectData.MapTable.push(newEquipmentMap)
+      this.EditProjectData.EquipmentList.push(newEquipment)
+      this.$message({
+        message: 'Add Equipment successfully!',
+        type: 'success'
+      })
+      this.EditProjectData.NewEquipment = {
+        name: newEquipment.type + '-' + number[newEquipment.type],
+        type: newEquipment.type,
+        ip: []
+      }
+    },
+    onCancelEditProject() {
+      this.EditProjectData = {
+        index: 0,
+        EquipmentList: [],
+        MapTable: [],
+        NewEquipment: {
+          name: '',
+          type: '',
+          ip: []
+        },
+        SelectEquipment: {
+          name: '',
+          type: '',
+          ip: []
+        },
+        DeleteEquipment: ''
+      }
+      this.EditProjectVisiable = false
+    },
+    onViewMap(data) {
+      this.EditProjectData.EquipmentList = data.EquipmentList
+      this.EditProjectData.MapTable = data.MapTable
+      this.ViewMapTableVisible = true
+    },
+    getIndexByName(name) {
+      for (var i = 0; i < this.EditProjectData.EquipmentList.length; i++) {
+        if (name === this.EditProjectData.EquipmentList[i].name) {
+          return i
+        }
+      }
+      return -1
+    },
+    checkIP(ip) {
+      var pattern = new RegExp(`^((25[0-5]|2[0-4]\\d|[1]{1}\\d{1}\\d{1}|[1-9]{1}\\d{1}|\\d{1})($|(?!\\.$)\\.)){4}$`)
+      if (pattern.test(ip)) {
+        return true
+      }
+      return false
     }
   }
 }

@@ -1,16 +1,16 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" />
-      <el-input v-model="listQuery.author" placeholder="Author" style="width: 200px;" class="filter-item" />
+      <el-input v-model="ListQuery.Title" placeholder="Title" style="width: 200px;" class="filter-item" />
+      <el-input v-model="ListQuery.Author" placeholder="Author" style="width: 200px;" class="filter-item" />
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
       </el-button>
     </div>
     <div style="height: 20px" />
     <el-table
-      v-loading="listLoading"
-      :data="list"
+      v-loading="ListLoading"
+      :data="ProjectList"
       element-loading-text="Loading"
       border
       fit
@@ -21,78 +21,80 @@
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="ID" width="250">
+      <el-table-column align="center" label="ID" width="210">
         <template slot-scope="scope">
-          {{ scope.row.id }}
+          {{ scope.row.Id }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Title">
         <template slot-scope="scope">
-          {{ scope.row.title }}
+          {{ scope.row.Title }}
         </template>
       </el-table-column>
       <el-table-column label="Author" width="110" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.user }}</span>
+          <span>{{ scope.row.User }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="IP number" width="110" align="center">
+      <el-table-column label="Equipment Number" width="160" align="center">
         <template slot-scope="scope">
-          {{ scope.row.iplist.length }}
+          {{ scope.row.EquipmentList.length }}
         </template>
       </el-table-column>
       <el-table-column class-name="status-col" label="Score" width="110" align="center">
         <template slot-scope="scope">
-          {{ !!!scope.row.score ? 'Not rated':scope.row.score }}
+          {{ !!!scope.row.Score ? 'Not rated':scope.row.Score }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions" width="300">
         <template slot-scope="scope">
-          <el-button class="el-icon-search" @click="onViewMap(scope.$index, scope.row)" />
-          <el-button class="el-icon-edit" @click="updateProject(scope.$index, scope.row)" />
-          <el-button class="el-icon-delete" @click="deleteProject(scope.$index, scope.row.id)" />
+          <el-button class="el-icon-search" @click="ViewMapTable(scope.$index, scope.row)" />
+          <el-button class="el-icon-edit" @click="EvaluatePorject(scope.$index, scope.row)" />
+          <el-button class="el-icon-delete" @click="DeleteProject(scope.$index, scope.row.id)" />
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog title="Score" :visible.sync="dialogFormVisible">
-      <el-form ref="temp" :model="temp" label-width="120px">
+    <el-dialog title="Score" :visible.sync="EditScoreVisible">
+      <el-form ref="SelectProject" :model="SelectProject" label-width="120px">
         <el-form-item label="Score">
-          <el-input v-model="temp.score" style="width:350px" />
+          <el-input v-model="SelectProject.Score" style="width:350px" />
         </el-form-item>
         <el-form-item>
-          <el-button style="width:150px" type="primary" @click="onUpdate">Evaluate</el-button>
+          <el-button style="width:150px" type="primary" @click="onEvaluatePorject">Evaluate</el-button>
           <el-button style="width:150px" @click="onCancle">Cancle</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
 
-    <el-dialog :title="temp.title" :visible.sync="ViewdialogFormVisible" width="1000px">
-      <el-form ref="temp" :model="temp" label-width="120px">
+    <el-dialog :title="SelectProject.Title" :visible.sync="ViewMapTableVisible" width="1000px">
+      <el-form ref="SelectProject" :model="SelectProject" label-width="120px">
         <el-form-item label="Score">
-          <el-input v-model="temp.score" style="width:350px" />
+          <el-input v-model="SelectProject.Score" style="width:350px" />
         </el-form-item>
         <el-table
-          v-model="temp"
-          :data="temp.map"
+          v-model="SelectProject"
+          :data="SelectProject.EquipmentList"
           border
           fit
           highlight-current-row
         >
-          <el-table-column align="center" label="IP" width="150px">
+          <el-table-column align="center" label="Equipment" width="150px">
             <template slot-scope="scope">
-              {{ scope.row.ip }}
+              {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip?'('+scope.row.ip+')':'') }}
             </template>
           </el-table-column>
-          <el-table-column v-for="ip in temp.iplist" v-bind:key="ip" v-bind:label="ip" align="center">
+          <el-table-column v-for="e in SelectProject.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip?'('+e.ip+')':'')" align="center">
             <template slot-scope="scope">
-              <el-switch v-model="scope.row.whether[ip]" />
+              <el-switch v-model="SelectProject.MapTable[scope.$index][SelectProject.EquipmentList.indexOf(e)]" :disabled="true" />
             </template>
           </el-table-column>
         </el-table>
         <el-form-item />
+        <vis style="height: 500px; border: 1px solid lightgray;" :equipment-list="SelectProject.EquipmentList" :map-table="SelectProject.MapTable" />
+        <el-form-item />
         <el-form-item>
-          <el-button style="width:150px" type="primary" @click="onUpdate">Evaluate</el-button>
+          <el-button style="width:150px" type="primary" @click="onEvaluatePorject">Evaluate</el-button>
           <el-button style="width:150px" @click="onCancle">Cancle</el-button>
         </el-form-item>
       </el-form>
@@ -102,9 +104,11 @@
 </template>
 
 <script>
-import { getListAdmin, deleteProjectAdmin, updateProjectAdmin, QueryListAdmin } from '@/api/table'
+import { GetProjectsAdmin, DeleteProjectAdmin, UpdateProjectAdmin, QueryListAdmin } from '@/api/table'
+import vis from '@/components/Network/index'
 
 export default {
+  components: { vis },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -117,21 +121,22 @@ export default {
   },
   data() {
     return {
-      list: [],
-      listLoading: true,
-      ViewdialogFormVisible: false,
-      dialogFormVisible: false,
-      temp: {
+      ProjectList: [],
+      ViewMapTableVisible: false,
+      EditScoreVisible: false,
+      SelectProject: {
+        Id: '',
         index: 0,
-        score: 0,
-        title: '',
-        iplist: [],
-        map: []
+        Score: 0,
+        Title: '',
+        EquipmentList: [],
+        MapTable: []
       },
-      listQuery: {
-        title: '',
-        author: ''
-      }
+      ListQuery: {
+        Title: '',
+        Author: ''
+      },
+      ListLoading: true
     }
   },
   created() {
@@ -139,84 +144,62 @@ export default {
   },
   methods: {
     fetchData() {
-      this.listLoading = true
-      getListAdmin().then(response => {
-        var temp = response.data
-        for (var index in temp) {
+      this.ListLoading = true
+      GetProjectsAdmin().then(response => {
+        var data = response.data
+        for (var index in data) {
           var each = {}
-          each.id = temp[index].id
-          each.user = temp[index].user
-          each.title = temp[index].title
-          each.score = temp[index].score
-          each.iplist = []
-          for (var n in temp[index].ip) {
-            each.iplist.push(temp[index].ip[n].value)
+          each.Id = data[index].id
+          each.User = data[index].user
+          each.Title = data[index].title
+          each.Score = data[index].score
+          each.EquipmentList = data[index].equipment
+          each.MapTable = []
+          const MapT = data[index].map['column']
+          for (var i in MapT) {
+            each.MapTable.push(MapT[i]['connected'])
           }
-          each.map = []
-          for (var i in temp[index].map.column) {
-            var eachmap = {
-              'ip': each.iplist[i],
-              whether: {}
-            }
-            for (var j in temp[index].map.column[i]['connected']) {
-              eachmap.whether[each.iplist[j]] = temp[index].map.column[i]['connected'][j]
-            }
-            each.map.push(eachmap)
-          }
-          this.list.push(each)
+          this.ProjectList.push(each)
         }
-        this.listLoading = false
+        this.ListLoading = false
       })
     },
     handleFilter() {
-      if (this.listQuery.author === '' && this.listQuery.title === '') {
-        return
-      }
-      this.listLoading = true
-      QueryListAdmin(this.listQuery).then(response => {
-        this.list = []
-        var temp = response.data
-        for (var index in temp) {
+      this.ListLoading = true
+      QueryListAdmin(this.ListQuery).then(response => {
+        this.ProjectList = []
+        var data = response.data
+        for (var index in data) {
           var each = {}
-          each.id = temp[index].id
-          each.user = temp[index].user
-          each.title = temp[index].title
-          each.score = temp[index].score
-          each.iplist = []
-          for (var n in temp[index].ip) {
-            each.iplist.push(temp[index].ip[n].value)
+          each.Id = data[index].id
+          each.User = data[index].user
+          each.Title = data[index].title
+          each.Score = data[index].score
+          each.EquipmentList = data[index].equipment
+          each.MapTable = []
+          const MapT = data[index].map['column']
+          for (var i in MapT) {
+            each.MapTable.push(MapT[i]['connected'])
           }
-          each.map = []
-          for (var i in temp[index].map.column) {
-            var eachmap = {
-              'ip': each.iplist[i],
-              whether: {}
-            }
-            for (var j in temp[index].map.column[i]['connected']) {
-              eachmap.whether[each.iplist[j]] = temp[index].map.column[i]['connected'][j]
-            }
-            each.map.push(eachmap)
-          }
-          this.list.push(each)
+          this.ProjectList.push(each)
         }
-        this.listLoading = false
+        this.ListLoading = false
       })
     },
-    updateProject(index, data) {
-      this.temp.id = data.id
-      this.temp.index = index
-      this.temp.score = data.score
-      this.dialogFormVisible = true
+    EvaluatePorject(index, data) {
+      this.SelectProject.Id = data.Id
+      this.SelectProject.index = index
+      this.SelectProject.Score = data.Score
+      this.EditScoreVisible = true
     },
-    onUpdate() {
-      updateProjectAdmin({ 'id': this.temp.id, 'score': this.temp.score }).then((res) => {
-        this.list[this.temp.index].score = this.temp.score
+    onEvaluatePorject() {
+      UpdateProjectAdmin({ 'id': this.SelectProject.Id, 'score': this.SelectProject.Score }).then((res) => {
+        this.ProjectList[this.SelectProject.index].Score = this.SelectProject.Score
         this.$message({
           message: 'Evaluate Project Successfully!',
           type: 'success'
         })
-        this.ViewdialogFormVisible = false
-        this.dialogFormVisible = false
+        this.onCancle()
       }).catch(() => {
         this.$message({
           message: 'Error!',
@@ -225,12 +208,12 @@ export default {
       })
     },
     onCancle() {
-      this.ViewdialogFormVisible = false
-      this.dialogFormVisible = false
+      this.ViewMapTableVisible = false
+      this.EditScoreVisible = false
     },
-    deleteProject(index, id) {
-      deleteProjectAdmin({ 'id': id }).then((res) => {
-        this.list.splice(index, 1)
+    DeleteProject(index, id) {
+      DeleteProjectAdmin({ 'id': id }).then((res) => {
+        this.ProjectList.splice(index, 1)
         this.$message({
           message: 'Delete Project Successfully!',
           type: 'success'
@@ -242,13 +225,14 @@ export default {
         })
       })
     },
-    onViewMap(index, data) {
-      this.temp.id = data.id
-      this.temp.index = index
-      this.temp.title = data.title
-      this.temp.iplist = data.iplist
-      this.temp.map = data.map
-      this.ViewdialogFormVisible = true
+    ViewMapTable(index, data) {
+      this.SelectProject.Id = data.Id
+      this.SelectProject.Score = data.Score
+      this.SelectProject.index = index
+      this.SelectProject.Title = data.Title
+      this.SelectProject.EquipmentList = data.EquipmentList
+      this.SelectProject.MapTable = data.MapTable
+      this.ViewMapTableVisible = true
     }
   }
 }

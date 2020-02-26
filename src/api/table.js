@@ -1,25 +1,25 @@
 import request from '@/utils/request'
 
-export function getList() {
+export function GetProjectList() {
   return request({
-    url: 'http://www.rowtoolong.cn:8002/api/project/',
+    url: 'http://localhost:8002/api/project/',
     method: 'get'
   })
 }
 
-export function getListAdmin() {
+export function GetProjectsAdmin() {
   return request({
-    url: 'http://www.rowtoolong.cn:8003/admin/project/',
+    url: 'http://localhost:8003/admin/project/',
     method: 'get'
   })
 }
 
-export function createProject(params) {
+export function CreateProject(params) {
   return request({
-    url: 'http://www.rowtoolong.cn:8002/api/project/',
+    url: 'http://localhost:8002/api/project/',
     method: 'post',
     data: {
-      'ip': params['ip'],
+      'equipment': params['equipment'],
       'map': {
         'column': params['map']
       },
@@ -28,27 +28,27 @@ export function createProject(params) {
   })
 }
 
-export function deleteProject(params) {
+export function DeleteProject(params) {
   return request({
-    url: 'http://www.rowtoolong.cn:8002/api/project/?id=' + params['id'],
+    url: 'http://localhost:8002/api/project/?id=' + params['id'],
     method: 'delete'
   })
 }
 
-export function deleteProjectAdmin(params) {
+export function DeleteProjectAdmin(params) {
   return request({
-    url: 'http://www.rowtoolong.cn:8003/admin/project/?id=' + params['id'],
+    url: 'http://localhost:8003/admin/project/?id=' + params['id'],
     method: 'delete'
   })
 }
 
-export function updateProject(params) {
+export function UpdateProject(params) {
   return request({
-    url: 'http://www.rowtoolong.cn:8002/api/project/',
+    url: 'http://localhost:8002/api/project/',
     method: 'put',
     data: {
       'id': params['id'],
-      'ip': params['ip'],
+      'equipment': params['equipment'],
       'map': {
         'column': params['map']
       },
@@ -56,9 +56,9 @@ export function updateProject(params) {
     }
   })
 }
-export function updateProjectAdmin(params) {
+export function UpdateProjectAdmin(params) {
   return request({
-    url: 'http://www.rowtoolong.cn:8003/admin/project/score',
+    url: 'http://localhost:8003/admin/project/score',
     method: 'put',
     data: {
       'id': params['id'],
@@ -68,23 +68,27 @@ export function updateProjectAdmin(params) {
 }
 
 export function QueryListAdmin(params) {
-  if (params.title !== '') {
+  if (params.Title !== '') {
     return request({
-      url: 'http://www.rowtoolong.cn:8003/admin/project/title?title=' + params.title,
+      url: 'http://localhost:8003/admin/project/title?title=' + params.Title,
       method: 'get'
     })
   }
-  if (params.author !== '') {
+  if (params.Author !== '') {
     return request({
-      url: 'http://www.rowtoolong.cn:8003/admin/project/user?username=' + params.author,
+      url: 'http://localhost:8003/admin/project/user?username=' + params.Author,
       method: 'get'
     })
   }
+  return request({
+    url: 'http://localhost:8003/admin/project/',
+    method: 'get'
+  })
 }
 
-export function adminGetInfo() {
+export function AdminGetInfo() {
   return request({
-    url: 'http://www.rowtoolong.cn:8003/admin/info/',
+    url: 'http://localhost:8003/admin/info/',
     method: 'get'
   })
 }

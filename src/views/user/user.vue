@@ -1,15 +1,15 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.username" placeholder="Username" style="width: 200px;" class="filter-item" />
+      <el-input v-model="ListQuery.username" placeholder="Username" style="width: 200px;" class="filter-item" />
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
       </el-button>
     </div>
     <div style="height: 20px" />
     <el-table
-      v-loading="listLoading"
-      :data="list"
+      v-loading="ListLoading"
+      :data="UserList"
       element-loading-text="Loading"
       border
       fit
@@ -37,21 +37,21 @@
       </el-table-column>
       <el-table-column align="center" label="Project Number" width="225">
         <template slot-scope="scope">
-          <span>{{ scope.row.projectNumber }}</span>
+          <span>{{ scope.row.ProjectNumber }}</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions">
         <template slot-scope="scope">
-          <el-button class="el-icon-search" @click="onView(scope.$index, scope.row)" />
-          <el-button class="el-icon-delete" @click="onDelete(scope.$index, scope.row.username)" />
+          <el-button class="el-icon-search" @click="ViewUser(scope.$index, scope.row)" />
+          <el-button class="el-icon-delete" @click="DeleteUser(scope.$index, scope.row.username)" />
         </template>
       </el-table-column>
     </el-table>
 
-    <el-dialog :title="temp.username" :visible.sync="ViewdialogFormVisible" width="1000px">
+    <el-dialog :title="SelectUser.username" :visible.sync="ViewUserVisible" width="1000px">
       <el-table
-        v-loading="listLoading"
-        :data="temp.list"
+        v-loading="ListLoading"
+        :data="SelectUser.ProjectList"
         element-loading-text="Loading"
         border
         fit
@@ -62,68 +62,65 @@
             {{ scope.$index }}
           </template>
         </el-table-column>
-        <el-table-column align="center" label="ID" width="220">
+        <el-table-column align="center" label="ID" width="210">
           <template slot-scope="scope">
-            {{ scope.row.id }}
+            {{ scope.row.Id }}
           </template>
         </el-table-column>
         <el-table-column align="center" label="Title" width="150">
           <template slot-scope="scope">
-            {{ scope.row.title }}
+            {{ scope.row.Title }}
           </template>
         </el-table-column>
-        <el-table-column label="IP number" width="110" align="center">
+        <el-table-column label="Equipment number" width="150" align="center">
           <template slot-scope="scope">
-            {{ scope.row.iplist.length }}
+            {{ scope.row.EquipmentList.length }}
           </template>
         </el-table-column>
         <el-table-column class-name="status-col" label="Score" width="110" align="center">
           <template slot-scope="scope">
-            {{ !!!scope.row.score ? 'Not rated':scope.row.score }}
+            {{ !!!scope.row.Score ? 'Not rated':scope.row.Score }}
           </template>
         </el-table-column>
         <el-table-column align="center" label="Actions">
           <template slot-scope="scope">
-            <el-button class="el-icon-search" @click="onViewMap(scope.$index, scope.row)" />
-            <el-button class="el-icon-delete" />
+            <el-button class="el-icon-search" @click="ViewProjectMapTable(scope.$index, scope.row)" />
           </template>
         </el-table-column>
       </el-table>
     </el-dialog>
 
-    <el-dialog :title="temp.project.title" :visible.sync="ViewMapdialogFormVisible" width="1000px">
-      <el-form ref="temp" :model="temp.project" label-width="120px">
+    <el-dialog :title="SelectUser.SelectProject.Title" :visible.sync="ViewMapTableVisible" width="1000px">
+      <el-form ref="SelectProject" :model="SelectUser.SelectProject" label-width="120px">
         <el-form-item label="Score">
-          <el-input v-model="temp.project.score" style="width:350px" />
+          <el-input v-model="SelectUser.SelectProject.Score" style="width:350px" />
         </el-form-item>
         <el-table
-          v-model="temp.project"
-          :data="temp.project.map"
+          v-model="SelectUser.SelectProject"
+          :data="SelectUser.SelectProject.EquipmentList"
           border
           fit
           highlight-current-row
         >
-          <el-table-column align="center" label="IP" width="150px">
+          <el-table-column align="center" label="Equipment" width="150px">
             <template slot-scope="scope">
-              {{ scope.row.ip }}
+              {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip?'('+scope.row.ip+')':'') }}
             </template>
           </el-table-column>
-          <el-table-column v-for="ip in temp.project.iplist" v-bind:key="ip" v-bind:label="ip" align="center">
+          <el-table-column v-for="e in SelectUser.SelectProject.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip?'('+e.ip+')':'')" align="center">
             <template slot-scope="scope">
-              <el-switch v-model="scope.row.whether[ip]" />
+              <el-switch v-model="SelectUser.SelectProject.MapTable[scope.$index][SelectUser.SelectProject.EquipmentList.indexOf(e)]" :disabled="true" />
             </template>
           </el-table-column>
         </el-table>
         <el-form-item />
+        <vis style="height: 500px; border: 1px solid lightgray;" :equipment-list="SelectUser.SelectProject.EquipmentList" :map-table="SelectUser.SelectProject.MapTable" />
+        <el-form-item />
         <el-form-item>
-          <el-button style="width:150px" type="primary" @click="onUpdate">Evaluate</el-button>
-          <el-button style="width:150px" @click="onCancle">Cancle</el-button>
+          <el-button style="width:150px" type="primary" @click="onEvaluateProject">Evaluate</el-button>
+          <el-button style="width:150px" @click="onCancleEvaluateProject">Cancle</el-button>
         </el-form-item>
         <el-form-item />
-        <!-- <el-form-item>
-          <el-button style="width:150px" type="primary" @click="onUpdate">Evaluate</el-button>
-          <el-button style="width:150px" @click="onCancle">Cancle</el-button>
-        </el-form-item> -->
       </el-form>
     </el-dialog>
 
@@ -131,10 +128,12 @@
 </template>
 
 <script>
-import { getAllUsers, deleteUser, getUserByUsername } from '@/api/user'
-import { QueryListAdmin, updateProjectAdmin } from '@/api/table'
+import { GetAllUsers, DeleteUser, GetUserByUsername } from '@/api/user'
+import { QueryListAdmin, UpdateProjectAdmin } from '@/api/table'
+import vis from '@/components/Network/index'
 
 export default {
+  components: { vis },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -147,26 +146,26 @@ export default {
   },
   data() {
     return {
-      list: [],
-      listLoading: true,
-      ViewdialogFormVisible: false,
-      ViewMapdialogFormVisible: false,
-      listQuery: {
+      UserList: [],
+      ViewUserVisible: false,
+      ViewMapTableVisible: false,
+      ListQuery: {
         username: ''
       },
-      temp: {
+      SelectUser: {
         index: 0,
-        username: '',
-        list: [],
-        project: {
+        Username: '',
+        ProjectList: [],
+        SelectProject: {
           index: 0,
-          id: '',
-          score: 0,
-          title: '',
-          iplist: '',
-          map: []
+          Id: '',
+          Score: 0,
+          Title: '',
+          EquipmentList: [],
+          MapTable: []
         }
-      }
+      },
+      ListLoading: true
     }
   },
   created() {
@@ -174,48 +173,48 @@ export default {
   },
   methods: {
     fetchData() {
-      this.listLoading = true
-      getAllUsers().then(async response => {
+      this.ListLoading = true
+      GetAllUsers().then(async response => {
         var adminindex = 0
-        this.list = response.data
-        for (var index in this.list) {
-          if (this.list[index].username === 'admin') {
+        this.UserList = response.data
+        for (var index in this.UserList) {
+          if (this.UserList[index].username === 'admin') {
             adminindex = index
             continue
           }
-          await QueryListAdmin({ title: '', author: this.list[index].username }).then(res => {
-            this.list[index].project = this.handleProjectData(res.data)
-            this.list[index].projectNumber = this.list[index].project.length
+          await QueryListAdmin({ Title: '', Author: this.UserList[index].username }).then(res => {
+            this.UserList[index].ProjectList = this.HandleProjectData(res.data)
+            this.UserList[index].ProjectNumber = this.UserList[index].ProjectList.length
           })
         }
-        this.list.splice(adminindex, 1)
-        this.listLoading = false
+        this.UserList.splice(adminindex, 1)
+        this.ListLoading = false
       })
     },
-    onView(index, data) {
-      this.temp.index = index
-      this.temp.username = data.username
-      this.temp.list = data.project
-      this.ViewdialogFormVisible = true
+    ViewUser(index, data) {
+      this.SelectUser.index = index
+      this.SelectUser.username = data.username
+      this.SelectUser.ProjectList = data.ProjectList
+      this.ViewUserVisible = true
     },
-    onViewMap(index, data) {
-      this.temp.project.index = index
-      this.temp.project.id = data.id
-      this.temp.project.score = data.score
-      this.temp.project.title = data.title
-      this.temp.project.iplist = data.iplist
-      this.temp.project.map = data.map
-      this.ViewMapdialogFormVisible = true
+    ViewProjectMapTable(index, data) {
+      this.SelectUser.SelectProject.index = index
+      this.SelectUser.SelectProject.Id = data.Id
+      this.SelectUser.SelectProject.Score = data.Score
+      this.SelectUser.SelectProject.Title = data.Title
+      this.SelectUser.SelectProject.EquipmentList = data.EquipmentList
+      this.SelectUser.SelectProject.MapTable = data.MapTable
+      this.ViewMapTableVisible = true
     },
-    onUpdate() {
-      updateProjectAdmin({ 'id': this.temp.project.id,
-        'score': this.temp.project.score }).then(response => {
-        this.list[this.temp.index].project[this.temp.project.index].score = this.temp.project.score
+    onEvaluateProject() {
+      UpdateProjectAdmin({ 'id': this.SelectUser.SelectProject.Id,
+        'score': this.SelectUser.SelectProject.Score }).then(response => {
+        this.UserList[this.SelectUser.index].ProjectList[this.SelectUser.SelectProject.index].Score = this.SelectUser.SelectProject.Score
         this.$message({
           message: 'Evaluate Project Successfully!',
           type: 'success'
         })
-        this.ViewMapdialogFormVisible = false
+        this.ViewMapTableVisible = false
       }).catch(() => {
         this.$message({
           message: 'Error!',
@@ -223,12 +222,12 @@ export default {
         })
       })
     },
-    onCancle() {
-      this.ViewMapdialogFormVisible = false
+    onCancleEvaluateProject() {
+      this.ViewMapTableVisible = false
     },
-    onDelete(index, user) {
-      deleteUser({ username: user }).then(response => {
-        this.list.splice(index, 1)
+    DeleteUser(index, user) {
+      DeleteUser({ username: user }).then(response => {
+        this.UserList.splice(index, 1)
         this.$message({
           message: 'Delete User Successfully!',
           type: 'success'
@@ -241,48 +240,36 @@ export default {
       })
     },
     handleFilter() {
-      if (this.listQuery.username === '') {
+      if (this.ListQuery.username === '') {
         return
       }
-      getUserByUsername({ username: this.listQuery.username }).then(async response => {
-        this.listLoading = true
-        this.list = response.data
-        for (var index in this.list) {
-          await QueryListAdmin({ title: '', author: this.list[index].username }).then(res => {
-            this.list[index].project = this.handleProjectData(res.data)
-            this.list[index].projectNumber = this.list[index].project.length
-          })
-        }
-        this.listLoading = false
+      GetUserByUsername({ username: this.ListQuery.username }).then(async response => {
+        this.ListLoading = true
+        this.UserList = response.data
+        await QueryListAdmin({ Title: '', Author: this.UserList[0].username }).then(res => {
+          this.UserList[0].ProjectList = this.HandleProjectData(res.data)
+          this.UserList[0].ProjectNumber = this.UserList[0].ProjectList.length
+        })
+        this.ListLoading = false
       })
     },
-    handleProjectData(data) {
-      var temp = data
-      var list = []
-      for (var index in temp) {
+    HandleProjectData(data) {
+      var ProjectList = []
+      for (var index in data) {
         var each = {}
-        each.id = temp[index].id
-        each.user = temp[index].user
-        each.title = temp[index].title
-        each.score = temp[index].score
-        each.iplist = []
-        for (var n in temp[index].ip) {
-          each.iplist.push(temp[index].ip[n].value)
+        each.Id = data[index].id
+        each.User = data[index].user
+        each.Title = data[index].title
+        each.Score = data[index].score
+        each.EquipmentList = data[index].equipment
+        each.MapTable = []
+        const MapT = data[index].map['column']
+        for (var i in MapT) {
+          each.MapTable.push(MapT[i]['connected'])
         }
-        each.map = []
-        for (var i in temp[index].map.column) {
-          var eachmap = {
-            'ip': each.iplist[i],
-            whether: {}
-          }
-          for (var j in temp[index].map.column[i]['connected']) {
-            eachmap.whether[each.iplist[j]] = temp[index].map.column[i]['connected'][j]
-          }
-          each.map.push(eachmap)
-        }
-        list.push(each)
+        ProjectList.push(each)
       }
-      return list
+      return ProjectList
     }
   }
 }

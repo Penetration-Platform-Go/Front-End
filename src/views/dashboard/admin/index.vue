@@ -11,7 +11,7 @@
 
 import PanelGroup from '@/components/PanelGroup'
 import LineChart from '@/components/LineChart'
-import { adminGetInfo } from '@/api/table'
+import { AdminGetInfo } from '@/api/table'
 
 export default {
   components: { PanelGroup, LineChart },
@@ -33,11 +33,11 @@ export default {
   },
   methods: {
     fetchData() {
-      adminGetInfo().then(response => {
+      AdminGetInfo().then(response => {
         const data = response.data
         this.dataNumber.Users = data.usernumber
         this.dataNumber.AllProjects = data.allprojectnumber
-        this.dataNumber.NewProjects = data.notratedprojectnumber
+        this.dataNumber.NewProjects = (!data.notratedprojectnumber ? 0 : data.notratedprojectnumber)
         this.dataNumber.Views = data.allviews
         this.lineChartData.actualData = data.ViewsBeforeWeek
       })
