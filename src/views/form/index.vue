@@ -7,13 +7,13 @@
       <el-form-item label="New Equipment">
         <el-input v-model="NewEquipment.name" style="width:300px" placeholder="New equipment name" />
         <el-select v-model="NewEquipmentType" style="width:300px" placeholder="New equipment type">
-          <el-option v-for="e in form.EquipmentsType" v-bind:key="e" v-bind:value="e" />
+          <el-option v-for="e in form.EquipmentsType" :key="e" :value="e" />
         </el-select>
         <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
       </el-form-item>
       <el-form-item label="Delete Equipment">
         <el-select v-model="form.DeleteEquipment" style="width:300px" placeholder="Equipment Delete">
-          <el-option v-for="e in form.EquipmentList" v-bind:key="e.name" v-bind:value="e.name" />
+          <el-option v-for="e in form.EquipmentList" :key="e.name" :value="e.name" />
         </el-select>
         <el-button style="width:80px" type="primary" @click="onDeleteEquipment">Delete</el-button>
       </el-form-item>
@@ -26,14 +26,14 @@
         @row-click="onClickTableHead"
         max-height="400px"
       >
-        <el-table-column align="center" label="Equipment" width="150px">
+        <el-table-column align="center" label="Equipment(click⬇️)" width="160px">
           <template slot-scope="scope">
             {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip.length?'('+scope.row.ip+')':'') }}
           </template>
         </el-table-column>
-        <el-table-column v-for="e in form.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
+        <el-table-column v-for="e in form.EquipmentList" :key="e.name" :label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
           <template slot-scope="scope">
-            <el-switch v-model="form.MapTable[scope.$index][form.EquipmentList.indexOf(e)]" v-bind:disabled="form.EquipmentList.indexOf(e) >= scope.$index ? true : false" />
+            <el-switch v-model="form.MapTable[scope.$index][form.EquipmentList.indexOf(e)]" :disabled="form.EquipmentList.indexOf(e) >= scope.$index ? true : false" />
           </template>
         </el-table-column>
       </el-table>
@@ -53,16 +53,16 @@
         </el-form-item>
         <el-form-item label="Type">
           <el-select v-model="form.SelectEquipment.type" style="width:300px" placeholder="Equipment type">
-            <el-option v-for="e in form.EquipmentsType" v-bind:key="e" v-bind:value="e" />
+            <el-option v-for="e in form.EquipmentsType" :key="e" :value="e" />
           </el-select>
         </el-form-item>
         <el-form-item label="Add IP">
           <el-input v-model="form.SelectEquipment.NewIP" style="width:300px" placeholder="New IP" />
           <el-button style="width:80px" type="primary" @click="onAddIP">Add</el-button>
         </el-form-item>
-        <el-form-item label="Delete IP">
+        <el-form-item label="IP List">
           <el-select v-model="form.SelectEquipment.SelectIP" style="width:300px" placeholder="IP">
-            <el-option v-for="ip in form.SelectEquipment.ip" v-bind:key="ip" v-bind:value="ip" />
+            <el-option v-for="ip in form.SelectEquipment.ip" :key="ip" :value="ip" />
           </el-select>
           <el-button style="width:80px" type="primary" @click="onDeleteIP">Delete</el-button>
         </el-form-item>
@@ -83,15 +83,20 @@ import vis from '@/components/Network/index'
 
 export default {
   components: { vis },
+  provide() {
+    return {
+      onDoubleClickNode: this.onDoubleClickNode
+    }
+  },
   data() {
     return {
       form: {
         Title: '',
-        EquipmentsType: ['PC', 'Route'],
+        EquipmentsType: ['PC', 'Route', 'Switch'],
         EquipmentList: [{
           name: 'PC-0',
           type: 'PC',
-          ip: ['127.0.0.1']
+          ip: ['192.168.0.100/24']
         }],
         MapTable: [[true]],
         SelectEquipment: {
@@ -170,7 +175,7 @@ export default {
           this.form.EquipmentList = [{
             name: 'PC-0',
             type: 'PC',
-            ip: ['127.0.0.1']
+            ip: ['192.168.0.100/24']
           }]
           this.form.MapTable = [[true]]
           this.$message({
@@ -196,7 +201,7 @@ export default {
       this.form.EquipmentList = [{
         name: 'PC-0',
         type: 'PC',
-        ip: ['127.0.0.1']
+        ip: ['192.168.0.100/24']
       }]
       this.form.MapTable = [[true]]
       this.$message({
@@ -225,6 +230,15 @@ export default {
       this.form.SelectEquipment.type = row.type
       this.form.SelectEquipment.ip = row.ip
       this.form.SelectEquipment.index = this.getIndexByName(row.name)
+      this.EditEquipmentVisible = true
+    },
+    onClickNode(index) {
+    },
+    onDoubleClickNode(index) {
+      this.form.SelectEquipment.name = this.form.EquipmentList[index].name
+      this.form.SelectEquipment.type = this.form.EquipmentList[index].type
+      this.form.SelectEquipment.ip = this.form.EquipmentList[index].ip
+      this.form.SelectEquipment.index = index
       this.EditEquipmentVisible = true
     },
     onEditEquipment() {

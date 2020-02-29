@@ -8,7 +8,7 @@ import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/login', '/register'] // no redirect whitelist
+const whiteList = ['/index', '/login', '/register'] // no redirect whitelist
 
 router.beforeEach((to, from, next) => {
   // start progress bar
@@ -21,7 +21,7 @@ router.beforeEach((to, from, next) => {
   const hasToken = getToken()
 
   if (hasToken) {
-    if (to.path === '/login' || to.path === '/register') {
+    if (to.path === '/login' || to.path === '/register' || to.path === '/index') {
       // if is logged in, redirect to the home page
       next({ path: '/' })
       NProgress.done()
@@ -41,7 +41,7 @@ router.beforeEach((to, from, next) => {
           // remove token and go to login page to re-login
           store.dispatch('user/resetToken').then(res => {
             Message.error(error || 'Has Error')
-            next(`/login`)
+            next(`/index`)
             NProgress.done()
           })
         })
@@ -55,7 +55,7 @@ router.beforeEach((to, from, next) => {
       next()
     } else {
       // other pages that do not have permission to access are redirected to the login page.
-      next(`/login`)
+      next(`/index`)
       NProgress.done()
     }
   }

@@ -145,6 +145,11 @@ export default {
       return statusMap[status]
     }
   },
+  provide() {
+    return {
+      onDoubleClickNode: this.onDoubleClickNode
+    }
+  },
   data() {
     return {
       UserList: [],
@@ -271,6 +276,9 @@ export default {
         ProjectList.push(each)
       }
       return ProjectList
+    },
+    onDoubleClickNode(index) {
+      return
     }
   }
 }

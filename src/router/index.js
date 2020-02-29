@@ -32,6 +32,11 @@ import Layout from '@/layout'
  */
 export const constantRoutes = [
   {
+    path: '/index',
+    component: () => import('@/views/index'),
+    hidden: true
+  },
+  {
     path: '/login',
     component: () => import('@/views/login/index'),
     hidden: true
@@ -75,6 +80,20 @@ export const asyncRouterMap = [
         name: 'Dashboard',
         component: () => import('@/views/dashboard/admin/index'),
         meta: { title: 'Dashboard', icon: 'dashboard', roles: ['admin'] }
+      }
+    ]
+  },
+  {
+    path: '/introduction',
+    component: Layout,
+    redirect: '/introduction/index',
+    meta: { roles: ['editor', 'admin'] },
+    children: [
+      {
+        path: 'index',
+        name: 'introduction',
+        component: () => import('@/views/introduction/index'),
+        meta: { title: 'Introduction', icon: 'nested', roles: ['editor', 'admin'] }
       }
     ]
   },

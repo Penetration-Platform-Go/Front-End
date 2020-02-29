@@ -41,16 +41,18 @@
           {{ scope.row.EquipmentList.length }}
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="Score" width="110" align="center">
+      <el-table-column class-name="status-col" label="Score" width="150" align="center">
         <template slot-scope="scope">
-          {{ !!!scope.row.Score ? 'Not rated':scope.row.Score }}
+          <el-button @click="GetRobotScore(scope.row.Id)">
+            {{ !!!scope.row.Score ? 'Not rated':scope.row.Score }}
+          </el-button>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="Actions" width="300">
+      <el-table-column align="center" label="Actions" width="260">
         <template slot-scope="scope">
           <el-button class="el-icon-search" @click="ViewMapTable(scope.$index, scope.row)" />
           <el-button class="el-icon-edit" @click="EvaluatePorject(scope.$index, scope.row)" />
-          <el-button class="el-icon-delete" @click="DeleteProject(scope.$index, scope.row.id)" />
+          <el-button class="el-icon-delete" @click="DeleteProject(scope.$index, scope.row.Id)" />
         </template>
       </el-table-column>
     </el-table>
@@ -63,6 +65,17 @@
         <el-form-item>
           <el-button style="width:150px" type="primary" @click="onEvaluatePorject">Evaluate</el-button>
           <el-button style="width:150px" @click="onCancle">Cancle</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    <el-dialog title="Robot Score" :visible.sync="RobotScoreVisible">
+      <el-form label-width="120px">
+        <el-form-item label="Robot Score">
+          <el-input v-model="Robot.Score" style="width:350px" disabled="true" />
+        </el-form-item>
+        <el-form-item label="Information">
+          <textarea v-model="Robot.Information" style="width:450px; font-size:16px; resize: none; font-family:Arial;" :rows="Robot.RowNumber" disabled />
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -105,7 +118,7 @@
 </template>
 
 <script>
-import { GetProjectsAdmin, DeleteProjectAdmin, UpdateProjectAdmin, QueryListAdmin } from '@/api/table'
+import { GetScoreRobot, GetProjectsAdmin, DeleteProjectAdmin, UpdateProjectAdmin, QueryListAdmin } from '@/api/table'
 import vis from '@/components/Network/index'
 
 export default {
@@ -120,11 +133,17 @@ export default {
       return statusMap[status]
     }
   },
+  provide() {
+    return {
+      onDoubleClickNode: this.onDoubleClickNode
+    }
+  },
   data() {
     return {
       ProjectList: [],
       ViewMapTableVisible: false,
       EditScoreVisible: false,
+      RobotScoreVisible: false,
       SelectProject: {
         Id: '',
         index: 0,
@@ -136,6 +155,11 @@ export default {
       ListQuery: {
         Title: '',
         Author: ''
+      },
+      Robot: {
+        Information: '',
+        Score: 0,
+        RowNumber: 0
       },
       ListLoading: true
     }
@@ -187,6 +211,14 @@ export default {
         this.ListLoading = false
       })
     },
+    GetRobotScore(id) {
+      GetScoreRobot({ id: id }).then(res => {
+        this.Robot.Information = res.data.information
+        this.Robot.Score = res.data.score
+        this.Robot.RowNumber = this.Robot.Information.split('\n').length
+        this.RobotScoreVisible = true
+      })
+    },
     EvaluatePorject(index, data) {
       this.SelectProject.Id = data.Id
       this.SelectProject.index = index
@@ -234,6 +266,9 @@ export default {
       this.SelectProject.EquipmentList = data.EquipmentList
       this.SelectProject.MapTable = data.MapTable
       this.ViewMapTableVisible = true
+    },
+    onDoubleClickNode(index) {
+      return
     }
   }
 }

@@ -17,6 +17,7 @@ export default {
       required: true
     }
   },
+  inject: ['onDoubleClickNode'],
   data() {
     return {
       picture: null,
@@ -88,21 +89,34 @@ export default {
       }
       var options = {
         edges: {
-          color: 'gray',
-          smooth: false
+          color: 'gray'
+          // smooth: false
         },
         groups: {
           'Route': {
-            shape: 'triangle',
-            color: '#FF9900'
+            shape: 'square',
+            color: '#109618'
           },
           'PC': {
             shape: 'dot',
             color: '#2B7CE9'
+          },
+          'Switch': {
+            shape: 'triangle',
+            color: '#FF9900'
           }
+        },
+        interaction: {
+          zoomView: false
         }
       }
       this.picture = new vis.Network(container, data, options)
+      this.picture.on('doubleClick', (params) => {
+        const node = params.nodes
+        if (node.length !== 0) {
+          this.onDoubleClickNode(node[0])
+        }
+      })
     }
   }
 }

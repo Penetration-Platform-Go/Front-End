@@ -78,7 +78,7 @@
           @row-click="onClickTableHead"
           max-height="400px"
         >
-          <el-table-column align="center" label="Equipment" width="150px">
+          <el-table-column align="center" label="Equipment(click⬇️)" width="160px">
             <template slot-scope="scope">
               {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip.length?'('+scope.row.ip+')':'') }}
             </template>
@@ -149,6 +149,11 @@ export default {
       return statusMap[status]
     }
   },
+  provide() {
+    return {
+      onDoubleClickNode: this.onDoubleClickNode
+    }
+  },
   data() {
     return {
       ProjectList: [],
@@ -166,7 +171,7 @@ export default {
         },
         DeleteEquipment: ''
       },
-      EquipmentsType: ['PC', 'Route'],
+      EquipmentsType: ['PC', 'Route', 'Switch'],
       NewEquipment: {
         name: '',
         type: '',
@@ -336,6 +341,13 @@ export default {
       this.EditProjectData.SelectEquipment.type = row.type
       this.EditProjectData.SelectEquipment.ip = row.ip
       this.EditProjectData.SelectEquipment.index = this.getIndexByName(row.name)
+      this.EditEquipmentVisible = true
+    },
+    onDoubleClickNode(index) {
+      this.EditProjectData.SelectEquipment.name = this.EditProjectData.EquipmentList[index].name
+      this.EditProjectData.SelectEquipment.type = this.EditProjectData.EquipmentList[index].type
+      this.EditProjectData.SelectEquipment.ip = this.EditProjectData.EquipmentList[index].ip
+      this.EditProjectData.SelectEquipment.index = index
       this.EditEquipmentVisible = true
     },
     onEditEquipment() {
