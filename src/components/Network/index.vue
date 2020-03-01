@@ -17,7 +17,7 @@ export default {
       required: true
     }
   },
-  inject: ['onDoubleClickNode'],
+  inject: ['onDoubleClickNode', 'onClickNode'],
   data() {
     return {
       picture: null,
@@ -115,6 +115,12 @@ export default {
         const node = params.nodes
         if (node.length !== 0) {
           this.onDoubleClickNode(node[0])
+        }
+      })
+      this.picture.on('oncontext', (params) => {
+        const node = params.nodes
+        if (node.length !== 0) {
+          this.onClickNode(node[0])
         }
       })
     }

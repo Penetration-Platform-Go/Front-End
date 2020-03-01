@@ -63,7 +63,7 @@
           </el-select>
           <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
         </el-form-item>
-        <el-form-item label="Delete Equipment">
+        <el-form-item label="Equipment List">
           <el-select v-model="EditProjectData.DeleteEquipment" style="width:300px" placeholder="Equipment Delete">
             <el-option v-for="e in EditProjectData.EquipmentList" v-bind:key="e.name" v-bind:value="e.name" />
           </el-select>
@@ -113,7 +113,7 @@
           <el-input v-model="EditProjectData.SelectEquipment.NewIP" style="width:300px" placeholder="New IP" />
           <el-button style="width:80px" type="primary" @click="onAddIP">Add</el-button>
         </el-form-item>
-        <el-form-item label="Delete IP">
+        <el-form-item label="IP List">
           <el-select v-model="EditProjectData.SelectEquipment.SelectIP" style="width:300px" placeholder="IP">
             <el-option v-for="ip in EditProjectData.SelectEquipment.ip" v-bind:key="ip" v-bind:value="ip" />
           </el-select>
@@ -128,6 +128,16 @@
 
     <el-dialog title="MapTable" :visible.sync="ViewMapTableVisible" width="1000px">
       <vis style="height: 500px; border: 1px solid lightgray;" :equipment-list="EditProjectData.EquipmentList" :map-table="EditProjectData.MapTable" />
+    </el-dialog>
+
+    <el-dialog :title="Node.SelectEquipment.name" :visible.sync="ViewNodeInfoVisible">
+      <el-form ref="SelectEquipment" :model="Node" label-width="120px">
+        <el-form-item label="IP List">
+          <el-select v-model="Node.Select" style="width:300px" placeholder="IP">
+            <el-option v-for="ip in Node.SelectEquipment.ip" :key="ip" :value="ip" />
+          </el-select>
+        </el-form-item>
+      </el-form>
     </el-dialog>
 
   </div>
@@ -151,7 +161,8 @@ export default {
   },
   provide() {
     return {
-      onDoubleClickNode: this.onDoubleClickNode
+      onDoubleClickNode: this.onDoubleClickNode,
+      onClickNode: this.onClickNode
     }
   },
   data() {
@@ -177,6 +188,13 @@ export default {
         type: '',
         ip: []
       },
+      Node: {
+        SelectEquipment: {
+          name: '',
+          ip: []
+        }
+      },
+      ViewNodeInfoVisible: false,
       NewEquipmentType: '',
       ListLoading: false,
       EditProjectVisiable: false,
@@ -340,6 +358,7 @@ export default {
       this.EditProjectData.SelectEquipment.name = row.name
       this.EditProjectData.SelectEquipment.type = row.type
       this.EditProjectData.SelectEquipment.ip = row.ip
+      this.EditProjectData.SelectEquipment.SelectIP = ''
       this.EditProjectData.SelectEquipment.index = this.getIndexByName(row.name)
       this.EditEquipmentVisible = true
     },
@@ -347,8 +366,13 @@ export default {
       this.EditProjectData.SelectEquipment.name = this.EditProjectData.EquipmentList[index].name
       this.EditProjectData.SelectEquipment.type = this.EditProjectData.EquipmentList[index].type
       this.EditProjectData.SelectEquipment.ip = this.EditProjectData.EquipmentList[index].ip
+      this.EditProjectData.SelectEquipment.SelectIP = ''
       this.EditProjectData.SelectEquipment.index = index
       this.EditEquipmentVisible = true
+    },
+    onClickNode(index) {
+      this.Node.SelectEquipment = this.EditProjectData.EquipmentList[index]
+      this.ViewNodeInfoVisible = true
     },
     onEditEquipment() {
       // TODO: integrate into function
@@ -450,7 +474,7 @@ export default {
       return -1
     },
     checkIP(ip) {
-      var pattern = new RegExp(`^((25[0-5]|2[0-4]\\d|[1]{1}\\d{1}\\d{1}|[1-9]{1}\\d{1}|\\d{1})($|(?!\\.$)\\.)){4}$`)
+      var pattern = new RegExp(/^((25[0-5]|2[0-4]\d|[1]\d{2}|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|[1]\d{2}|[1-9]\d|\d)(\/(\d|[1-2]\d|3[0-2]))?$/)
       if (pattern.test(ip)) {
         return true
       }

@@ -125,6 +125,16 @@
       </el-form>
     </el-dialog>
 
+    <el-dialog :title="Node.SelectEquipment.name" :visible.sync="ViewNodeInfoVisible">
+      <el-form ref="SelectEquipment" :model="Node" label-width="120px">
+        <el-form-item label="IP List">
+          <el-select v-model="Node.Select" style="width:300px" placeholder="IP">
+            <el-option v-for="ip in Node.SelectEquipment.ip" :key="ip" :value="ip" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -147,7 +157,8 @@ export default {
   },
   provide() {
     return {
-      onDoubleClickNode: this.onDoubleClickNode
+      onDoubleClickNode: this.onDoubleClickNode,
+      onClickNode: this.onClickNode
     }
   },
   data() {
@@ -171,7 +182,14 @@ export default {
           MapTable: []
         }
       },
-      ListLoading: true
+      ListLoading: true,
+      Node: {
+        SelectEquipment: {
+          name: '',
+          ip: []
+        }
+      },
+      ViewNodeInfoVisible: false
     }
   },
   created() {
@@ -279,6 +297,10 @@ export default {
     },
     onDoubleClickNode(index) {
       return
+    },
+    onClickNode(index) {
+      this.Node.SelectEquipment = this.SelectUser.SelectProject.EquipmentList[index]
+      this.ViewNodeInfoVisible = true
     }
   }
 }

@@ -11,7 +11,7 @@
         </el-select>
         <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
       </el-form-item>
-      <el-form-item label="Delete Equipment">
+      <el-form-item label="Equipment List">
         <el-select v-model="form.DeleteEquipment" style="width:300px" placeholder="Equipment Delete">
           <el-option v-for="e in form.EquipmentList" :key="e.name" :value="e.name" />
         </el-select>
@@ -73,6 +73,16 @@
       </el-form>
     </el-dialog>
 
+    <el-dialog :title="Node.SelectEquipment.name" :visible.sync="ViewNodeInfoVisible">
+      <el-form ref="SelectEquipment" :model="Node" label-width="120px">
+        <el-form-item label="IP List">
+          <el-select v-model="Node.Select" style="width:300px" placeholder="IP">
+            <el-option v-for="ip in Node.SelectEquipment.ip" :key="ip" :value="ip" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -85,7 +95,8 @@ export default {
   components: { vis },
   provide() {
     return {
-      onDoubleClickNode: this.onDoubleClickNode
+      onDoubleClickNode: this.onDoubleClickNode,
+      onClickNode: this.onClickNode
     }
   },
   data() {
@@ -115,7 +126,14 @@ export default {
         type: '',
         ip: []
       },
-      NewEquipmentType: 'PC'
+      NewEquipmentType: 'PC',
+      Node: {
+        SelectEquipment: {
+          name: '',
+          ip: []
+        }
+      },
+      ViewNodeInfoVisible: false
     }
   },
   watch: {
@@ -228,16 +246,20 @@ export default {
       }
       this.form.SelectEquipment.name = row.name
       this.form.SelectEquipment.type = row.type
+      this.form.SelectEquipment.SelectIP = ''
       this.form.SelectEquipment.ip = row.ip
       this.form.SelectEquipment.index = this.getIndexByName(row.name)
       this.EditEquipmentVisible = true
     },
     onClickNode(index) {
+      this.Node.SelectEquipment = this.form.EquipmentList[index]
+      this.ViewNodeInfoVisible = true
     },
     onDoubleClickNode(index) {
       this.form.SelectEquipment.name = this.form.EquipmentList[index].name
       this.form.SelectEquipment.type = this.form.EquipmentList[index].type
       this.form.SelectEquipment.ip = this.form.EquipmentList[index].ip
+      this.form.SelectEquipment.SelectIP = ''
       this.form.SelectEquipment.index = index
       this.EditEquipmentVisible = true
     },
@@ -344,7 +366,7 @@ export default {
       return -1
     },
     checkIP(ip) {
-      var pattern = new RegExp(`^((25[0-5]|2[0-4]\\d|[1]{1}\\d{1}\\d{1}|[1-9]{1}\\d{1}|\\d{1})($|(?!\\.$)\\.)){4}$`)
+      var pattern = new RegExp(/^((25[0-5]|2[0-4]\d|[1]\d{2}|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|[1]\d{2}|[1-9]\d|\d)(\/(\d|[1-2]\d|3[0-2]))?$/)
       if (pattern.test(ip)) {
         return true
       }
