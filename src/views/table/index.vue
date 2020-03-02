@@ -258,6 +258,20 @@ export default {
       })
     },
     onUpdateProject() {
+      if (this.EditProjectData.Title === '') {
+        this.$message({
+          message: 'Project title empty!',
+          type: 'warning'
+        })
+        return
+      }
+      if (this.EditProjectData.EquipmentList.length === 1) {
+        this.$message({
+          message: 'Equipment number wrong!',
+          type: 'error'
+        })
+        return
+      }
       var data = {
         'id': this.EditProjectData.Id,
         'title': this.EditProjectData.Title,

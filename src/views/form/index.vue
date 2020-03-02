@@ -146,9 +146,9 @@ export default {
   },
   methods: {
     onSubmit() {
-      if (this.form.title === '') {
+      if (this.form.Title === '') {
         this.$message({
-          message: 'Equipment title empty!',
+          message: 'Project title empty!',
           type: 'warning'
         })
         return

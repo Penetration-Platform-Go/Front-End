@@ -72,7 +72,7 @@
     <el-dialog title="Robot Score" :visible.sync="RobotScoreVisible">
       <el-form label-width="120px">
         <el-form-item label="Robot Score">
-          <el-input v-model="Robot.Score" style="width:350px" disabled="true" />
+          <el-input v-model="Robot.Score" style="width:350px" :disabled="true" />
         </el-form-item>
         <el-form-item label="Information">
           <textarea v-model="Robot.Information" style="width:450px; font-size:16px; resize: none; font-family:Arial;" :rows="Robot.RowNumber" disabled />
