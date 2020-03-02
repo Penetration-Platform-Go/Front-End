@@ -41,11 +41,16 @@
           {{ scope.row.EquipmentList.length }}
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="Score" width="150" align="center">
+      <el-table-column class-name="status-col" label="Robot" width="80" align="center">
         <template slot-scope="scope">
-          <el-button @click="GetRobotScore(scope.row.Id)">
-            {{ !!!scope.row.Score ? 'Not rated':scope.row.Score }}
+          <el-button @click="GetRobotScore(scope.$index)">
+            {{ scope.row.Robot.Score }}
           </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column class-name="status-col" label="Score" width="80" align="center">
+        <template slot-scope="scope">
+          {{ !!!scope.row.Score ? 'Not rated':scope.row.Score }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="Actions" width="260">
@@ -72,10 +77,10 @@
     <el-dialog title="Robot Score" :visible.sync="RobotScoreVisible">
       <el-form label-width="120px">
         <el-form-item label="Robot Score">
-          <el-input v-model="Robot.Score" style="width:350px" :disabled="true" />
+          <el-input v-model="SelectProject.Robot.Score" style="width:350px" :disabled="true" />
         </el-form-item>
         <el-form-item label="Information">
-          <textarea v-model="Robot.Information" style="width:450px; font-size:16px; resize: none; font-family:Arial;" :rows="Robot.RowNumber" disabled />
+          <textarea v-model="SelectProject.Robot.Information" style="width:450px; font-size:16px; resize: none; font-family:Arial;" :rows="SelectProject.Robot.RowNumber" disabled />
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -161,16 +166,16 @@ export default {
         Score: 0,
         Title: '',
         EquipmentList: [],
-        MapTable: []
+        MapTable: [],
+        Robot: {
+          Information: '',
+          Score: 0,
+          RowNumber: 0
+        }
       },
       ListQuery: {
         Title: '',
         Author: ''
-      },
-      Robot: {
-        Information: '',
-        Score: 0,
-        RowNumber: 0
       },
       ListLoading: true,
       Node: {
@@ -188,7 +193,7 @@ export default {
   methods: {
     fetchData() {
       this.ListLoading = true
-      GetProjectsAdmin().then(response => {
+      GetProjectsAdmin().then(async response => {
         var data = response.data
         for (var index in data) {
           var each = {}
@@ -202,6 +207,13 @@ export default {
           for (var i in MapT) {
             each.MapTable.push(MapT[i]['connected'])
           }
+          await GetScoreRobot({ id: each.Id }).then(res => {
+            each.Robot = {
+              Score: res.data.score,
+              Information: res.data.information,
+              RowNumber: res.data.information.split('\n').length
+            }
+          })
           this.ProjectList.push(each)
         }
         this.ListLoading = false
@@ -209,7 +221,7 @@ export default {
     },
     handleFilter() {
       this.ListLoading = true
-      QueryListAdmin(this.ListQuery).then(response => {
+      QueryListAdmin(this.ListQuery).then(async response => {
         this.ProjectList = []
         var data = response.data
         for (var index in data) {
@@ -224,18 +236,21 @@ export default {
           for (var i in MapT) {
             each.MapTable.push(MapT[i]['connected'])
           }
+          await GetScoreRobot({ id: each.Id }).then(res => {
+            each.Robot = {
+              Score: res.data.score,
+              Information: res.data.information,
+              RowNumber: res.data.information.split('\n').length
+            }
+          })
           this.ProjectList.push(each)
         }
         this.ListLoading = false
       })
     },
     GetRobotScore(id) {
-      GetScoreRobot({ id: id }).then(res => {
-        this.Robot.Information = res.data.information
-        this.Robot.Score = res.data.score
-        this.Robot.RowNumber = this.Robot.Information.split('\n').length
-        this.RobotScoreVisible = true
-      })
+      this.SelectProject.Robot = this.ProjectList[id].Robot
+      this.RobotScoreVisible = true
     },
     EvaluatePorject(index, data) {
       this.SelectProject.Id = data.Id
