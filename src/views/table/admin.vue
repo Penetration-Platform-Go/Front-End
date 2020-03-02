@@ -98,7 +98,7 @@
               {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip.length?'('+scope.row.ip+')':'') }}
             </template>
           </el-table-column>
-          <el-table-column v-for="e in SelectProject.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
+          <el-table-column v-for="e in SelectProject.EquipmentList" :key="e.name" :label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
             <template slot-scope="scope">
               <el-switch v-model="SelectProject.MapTable[scope.$index][SelectProject.EquipmentList.indexOf(e)]" :disabled="true" />
             </template>

@@ -59,13 +59,13 @@
         <el-form-item label="New Equipment">
           <el-input v-model="NewEquipment.name" style="width:300px" placeholder="New equipment name" />
           <el-select v-model="NewEquipmentType" style="width:300px" placeholder="New equipment type">
-            <el-option v-for="e in EquipmentsType" v-bind:key="e" v-bind:value="e" />
+            <el-option v-for="e in EquipmentsType" :key="e" :value="e" />
           </el-select>
           <el-button style="width:80px" type="primary" @click="onAddEquipment">Add</el-button>
         </el-form-item>
         <el-form-item label="Equipment List">
           <el-select v-model="EditProjectData.DeleteEquipment" style="width:300px" placeholder="Equipment Delete">
-            <el-option v-for="e in EditProjectData.EquipmentList" v-bind:key="e.name" v-bind:value="e.name" />
+            <el-option v-for="e in EditProjectData.EquipmentList" :key="e.name" :value="e.name" />
           </el-select>
           <el-button style="width:80px" type="primary" @click="onDeleteEquipment">Delete</el-button>
         </el-form-item>
@@ -75,17 +75,17 @@
           border
           fit
           highlight-current-row
-          @row-click="onClickTableHead"
           max-height="400px"
+          @row-click="onClickTableHead"
         >
           <el-table-column align="center" label="Equipment(click⬇️)" width="160px">
             <template slot-scope="scope">
               {{ scope.row.type + ':' + scope.row.name + (!!scope.row.ip.length?'('+scope.row.ip+')':'') }}
             </template>
           </el-table-column>
-          <el-table-column v-for="e in EditProjectData.EquipmentList" v-bind:key="e.name" v-bind:label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
+          <el-table-column v-for="e in EditProjectData.EquipmentList" :key="e.name" :label="e.type + ':' + e.name + (!!e.ip.length?'('+e.ip+')':'')" align="center">
             <template slot-scope="scope">
-              <el-switch v-model="EditProjectData.MapTable[scope.$index][EditProjectData.EquipmentList.indexOf(e)]" v-bind:disabled="EditProjectData.EquipmentList.indexOf(e) >= scope.$index ? true : false" />
+              <el-switch v-model="EditProjectData.MapTable[scope.$index][EditProjectData.EquipmentList.indexOf(e)]" :disabled="EditProjectData.EquipmentList.indexOf(e) >= scope.$index ? true : false" />
             </template>
           </el-table-column>
         </el-table>
@@ -106,7 +106,7 @@
         </el-form-item>
         <el-form-item label="Type">
           <el-select v-model="EditProjectData.SelectEquipment.type" style="width:300px" placeholder="Equipment type">
-            <el-option v-for="e in EquipmentsType" v-bind:key="e" v-bind:value="e" />
+            <el-option v-for="e in EquipmentsType" :key="e" :value="e" />
           </el-select>
         </el-form-item>
         <el-form-item label="Add IP">
@@ -115,7 +115,7 @@
         </el-form-item>
         <el-form-item label="IP List">
           <el-select v-model="EditProjectData.SelectEquipment.SelectIP" style="width:300px" placeholder="IP">
-            <el-option v-for="ip in EditProjectData.SelectEquipment.ip" v-bind:key="ip" v-bind:value="ip" />
+            <el-option v-for="ip in EditProjectData.SelectEquipment.ip" :key="ip" :value="ip" />
           </el-select>
           <el-button style="width:80px" type="primary" @click="onDeleteIP">Delete</el-button>
         </el-form-item>

@@ -23,8 +23,8 @@
         border
         fit
         highlight-current-row
-        @row-click="onClickTableHead"
         max-height="400px"
+        @row-click="onClickTableHead"
       >
         <el-table-column align="center" label="Equipment(click⬇️)" width="160px">
           <template slot-scope="scope">
