@@ -106,7 +106,7 @@ const actions = {
       register({ username: username, password: password, nickname: nickname, email: email }).then(response => {
         Message({
           message: 'Register Successfully!',
-          type: 'succuess',
+          type: 'success',
           duration: 5 * 1000
         })
         resolve()
@@ -126,7 +126,7 @@ const actions = {
       update({ username: username, nickname: nickname, email: email, photo: avatar }).then(response => {
         Message({
           message: 'Update Information Successfully!',
-          type: 'succuess',
+          type: 'success',
           duration: 5 * 1000
         })
         commit('SET_USER', username)
